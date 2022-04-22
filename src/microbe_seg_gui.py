@@ -21,7 +21,7 @@ from omero.constants import metadata
 from omero.rtypes import rint
 
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPalette, QColor, QIntValidator, QKeySequence, QPixmap, QImage
+from PyQt5.QtGui import QPalette, QColor, QIntValidator, QKeySequence, QPixmap, QImage, QIcon
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot
 
 from src.utils.data_cropping import DataCropWorker
@@ -72,6 +72,7 @@ class MicrobeSegMainWindow(QWidget):
 
         super().__init__(parent)
 
+        self.setWindowIcon(QIcon(str(model_path.parent / 'doc' / 'window-logo.png')))
         # Path for trained models
         self.model_path = model_path
         # Path for exported training data sets
@@ -135,6 +136,7 @@ class MicrobeSegMainWindow(QWidget):
         # Login window
         self.omero_login_dialog = QDialog()
         self.omero_login_dialog.setWindowTitle('Connect to OMERO')
+        self.omero_login_dialog.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.omero_username_label, self.omero_password_label = QLabel('Username'), QLabel('Password')
         self.omero_host_label, self.omero_port_label = QLabel('Host'), QLabel('Port')
         self.omero_username_edit = QLineEdit(omero_settings['omero_username'])
@@ -162,6 +164,7 @@ class MicrobeSegMainWindow(QWidget):
         self.omero_project_list = QListWidget()
         self.omero_project_list.setSelectionMode(QAbstractItemView.MultiSelection)
         self.omero_project_selection = QDialog()
+        self.omero_project_selection.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.omero_project_selection.setWindowTitle('Select project(s)')
         self.omero_project_selection_select_all_button = QPushButton('Select all')
         self.omero_project_selection_deselect_all_button = QPushButton('Deselect all')
@@ -172,6 +175,7 @@ class MicrobeSegMainWindow(QWidget):
         self.omero_dataset_list.setMinimumWidth(350)
         self.omero_dataset_list.setSelectionMode(QAbstractItemView.MultiSelection)
         self.omero_dataset_selection = QDialog()
+        self.omero_dataset_selection.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.omero_dataset_selection.setWindowTitle('Select dataset(s)')
         self.omero_dataset_selection_select_all_button = QPushButton('Select all')
         self.omero_dataset_selection_deselect_all_button = QPushButton('Deselect all')
@@ -182,6 +186,7 @@ class MicrobeSegMainWindow(QWidget):
         self.omero_file_list.setMinimumWidth(350)
         self.omero_file_list.setSelectionMode(QAbstractItemView.MultiSelection)
         self.omero_file_selection = QDialog()
+        self.omero_file_selection.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.omero_file_selection.setWindowTitle('Select file(s)')
         self.omero_file_selection_select_all_button = QPushButton('Select all')
         self.omero_file_selection_deselect_all_button = QPushButton('Deselect all')
@@ -190,6 +195,7 @@ class MicrobeSegMainWindow(QWidget):
         # OMERO box - trainset selection menu
         self.omero_trainset_list = QListWidget()
         self.omero_trainset_selection = QDialog()
+        self.omero_trainset_selection.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.omero_trainset_selection.setWindowTitle('Select training and test set')
         self.omero_new_trainset_name_label, self.omero_new_trainset_name_edit = QLabel('Name:'), QLineEdit()
         self.omero_new_trainset_add_button = QPushButton('Add')
@@ -219,6 +225,7 @@ class MicrobeSegMainWindow(QWidget):
         self.group_list = QListWidget()
         self.group_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.group_selection = QDialog()
+        self.group_selection.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.group_selection.setWindowTitle('Select group')
         self.group_selection_button = QPushButton('Ok')
         self.group_button = QPushButton("Change group")
@@ -255,6 +262,7 @@ class MicrobeSegMainWindow(QWidget):
 
         # Submenu - training data
         self.train_data = QDialog()
+        self.train_data.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.train_data.setWindowModality(Qt.ApplicationModal), self.train_data.setWindowTitle('Add Training Data')
         self.train_data_prelabel_checkbox = QCheckBox('Pre-labeling')
         self.train_data_all_frames_checkbox = QCheckBox('Use all frames')
@@ -292,11 +300,13 @@ class MicrobeSegMainWindow(QWidget):
         self.prelabel_model_list.setMinimumWidth(350)
         self.prelabel_model_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.prelabel_model_selection = QDialog()
+        self.prelabel_model_selection.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.prelabel_model_selection.setWindowTitle('Select model')
         self.prelabel_model_selection_button = QPushButton('Ok')
 
         # Submenu - training data: crop selection
         self.select_crops = CropSelectionDialog()
+        self.select_crops.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.select_crops.setWindowTitle('Select Crops')
         self.select_crops_overlay_checkbox = QCheckBox('Show overlay')
         self.select_crops_overlay_checkbox.setVisible(False)
@@ -323,6 +333,7 @@ class MicrobeSegMainWindow(QWidget):
 
         # Submenu - train
         self.train_settings = QDialog()
+        self.train_settings.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.train_settings.setWindowModality(Qt.ApplicationModal), self.train_settings.setWindowTitle('Training')
         self.train_settings_batchsize_label = QLabel('Batch size:')
         self.train_settings_batchsize_label.setMinimumWidth(85)
@@ -364,6 +375,7 @@ class MicrobeSegMainWindow(QWidget):
 
         # Submenu - eval
         self.evaluation_menu = QDialog()
+        self.evaluation_menu.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.evaluation_menu.setWindowModality(Qt.ApplicationModal), self.evaluation_menu.setWindowTitle('Evaluation')
         self.evaluation_batch_size_label = QLabel('Batch size:')
         self.evaluation_batch_size_label.setMinimumWidth(80)
@@ -392,6 +404,7 @@ class MicrobeSegMainWindow(QWidget):
 
         # Submenu - inference
         self.inference_menu = QDialog()
+        self.inference_menu.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.inference_menu.setWindowModality(Qt.ApplicationModal), self.inference_menu.setWindowTitle('Inference')
         self.inference_batch_size_label = QLabel('Batch size:')
         self.inference_batch_size_label.setMinimumWidth(80)
@@ -434,6 +447,7 @@ class MicrobeSegMainWindow(QWidget):
         self.inference_model_list.setMinimumWidth(350)
         self.inference_model_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.inference_model_selection = QDialog()
+        self.inference_model_selection.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         self.inference_model_selection.setWindowTitle('Select model')
         self.inference_model_selection_button = QPushButton('Ok')
 
