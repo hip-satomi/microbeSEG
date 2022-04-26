@@ -1,6 +1,6 @@
 # ![](doc/logo.png)
 
-microbeSEG is a deep learning-based tool for instance segmentation of roundish objects in 2D and 2D+t data, e.g., microbes. The microbeSEG workflow covers training data creation (with pre-labeling) or import, model training, model evaluation, and the final segmentation of the data. OMERO is used for a comprehensive data management. For training data annotation, the jointly developed toolkit collection ObiWan Microbi is used.
+microbeSEG is a deep learning-based tool for instance segmentation of roundish objects in 2D and 2D+t data, e.g., microbes. The microbeSEG workflow covers training data creation (with pre-labeling) or import, model training, model evaluation, and the final segmentation of the data. OMERO is used for a comprehensive data management. For training data annotation, the jointly developed toolkit collection ObiWan-Microbi is used.
 
 ![](doc/glutamicum.gif)
 
@@ -9,7 +9,7 @@ microbeSEG is a deep learning-based tool for instance segmentation of roundish o
 * [Anaconda Distribution](https://www.anaconda.com/distribution/#download-section).
 * For GPU use: a CUDA capable GPU (highly recommended for training).
 * Access to an [OMERO](https://www.openmicroscopy.org/omero/) server. For testing purposes a [free demo account](http://qa.openmicroscopy.org.uk/registry/demo_account/) can be requested.
-* ObiWan Microbi (to be published): after installing ObiWan Microbi, an OMERO server is available at the default ports.
+* ObiWan-Microbi (to be published): after installing ObiWan-Microbi, an OMERO server is available at the default ports.
 
 ## Installation
 
@@ -20,7 +20,7 @@ cd microbeSEG
 conda env create -f requirements.yml
 conda activate microbe_seg_ve
 ```
-Change the OMERO host, the OMERO port and the ObiWan Microbi annotation tool url in *settings.json* if necessary.
+Change the OMERO host, the OMERO port and the ObiWan-Microbi annotation tool url in *settings.json* if necessary.
 
 ## Getting Started with microbeSEG
 
@@ -127,7 +127,7 @@ The model selection works similar to the inference model selection. Now, a segme
 
 In cases where the segmentation is good but not error-free, the segmentation can be uploaded to OMERO as well. Then the segmentation errors can be corrected manually using the annotation tool.
 
-Note: only manually corrected crops are used for training, i.e., the pre-label masks need to be imported and exported in the annotation tool ObiWan Microbi. This prohibits to use erroneous, not yet corrected crops in the training process.
+Note: only manually corrected crops are used for training, i.e., the pre-label masks need to be imported and exported in the annotation tool ObiWan-Microbi. This prohibits to use erroneous, not yet corrected crops in the training process.
 
 ### Stop Calculations
 Training, evaluation, inference, data imports and data exports can be stopped by pressing *Control+C* in the corresponding menus. The stopping may need some time.
