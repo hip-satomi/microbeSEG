@@ -9,7 +9,7 @@ microbeSEG is a deep learning-based tool for instance segmentation of roundish o
 * [Anaconda Distribution](https://www.anaconda.com/distribution/#download-section).
 * For GPU use: a CUDA capable GPU (highly recommended for training).
 * Access to an [OMERO](https://www.openmicroscopy.org/omero/) server. For testing purposes a [free demo account](http://qa.openmicroscopy.org.uk/registry/demo_account/) can be requested.
-* ObiWan-Microbi (to be published): after installing ObiWan-Microbi, an OMERO server is available at the default ports.
+* ObiWan-Microbi (to be published): after installing [ObiWan-Microbi](https://github.com/hip-satomi/ObiWan-Microbi), an OMERO server is available at the default ports.
 
 ## Installation
 
@@ -145,6 +145,9 @@ Press F1 to open a short help.
 * [https://github.com/vqdang/hover_net](https://github.com/vqdang/hover_net) (aggregated Jaccard index implementation)
 * [https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer](https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer) (Ranger optimizer)
 * [https://git.scc.kit.edu/KIT-Sch-GE/2021_segmentation](https://git.scc.kit.edu/KIT-Sch-GE/2021_segmentation) (segmentation method)
+
+## microbeSEG Dataset
+A segmentation dataset with *E. coli* and *B. subtilis* training data is available at https://doi.org/10.5281/zenodo.6497715.
 
 ## Publication
 T. Scherr et al (2022): microbeSEG: Accurate cell segmentation with OMERO data management, *to be submitted*. 
