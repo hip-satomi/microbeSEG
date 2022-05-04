@@ -30,21 +30,17 @@ Run the file microbe_seg.py:
 python microbe_seg.py
 ```
 
-The graphical user interface and the login menu open:
-
-![microbeSEG](doc/login.png) ![login menu](doc/login_menu.png)
+The graphical user interface and the login menu open.
 
 ### Login
 You need your OMERO username, host address and port for connecting to your OMERO server. Filling this information in the file *settings.json* prefills the corresponding fields.
 
+![microbeSEG](doc/login.gif)
+
 ### File & Training Set Selection
-On the top left, available files and training sets can be viewed and selected. By default, only projects, datasets, files, and training sets of your default OMERO group are shown (see below how to change the group). When projects are selected, only datasets and files within these projects are shown. When datasets are selected, only files within these datasets are shown.
+On the top left, available files and training sets can be viewed and selected. By default, only projects, datasets, files, and training sets of your default OMERO group are shown (see below how to change the group). When projects are selected, only datasets and files within these projects are shown. When datasets are selected, only files within these datasets are shown. In the training set menu, available training sets can be selected and new datasets can be created (note: only training sets for which the user has write access are shown):
 
-![project selection](doc/project_selection.png) ![dataset selection](doc/dataset_selection.png) ![file selection](doc/file_selection.png)
-
-In the training set menu, available training sets can be selected and new datasets can be created (note: only training sets for which the user has write access are shown):
-
-![training set selection](doc/training_set_selection.png)
+![project selection](doc/file_selection.gif)
 
 For adding a new training set, the training data crop size needs to be selected. Selecting the crop size depends on the cell size and cell density in the images. We usually use 256px-by-256px or 320px-by-320px crops and prefer annotating more crops than using larger crops. However, the crop size should be selected that large that multiple (densely packed) cells could fit into the crop. 
 
@@ -55,7 +51,7 @@ Your OMERO account may be assigned to different groups, e.g., when you are in mu
 
 ![group selection](doc/group_selection.png)
 
-You can only see groups you are part of. You can only see and select projects, datasets, files, and training sets of the selected group.
+You can only see groups you are a member of. You can only see and select projects, datasets, files, and training sets of the selected group.
 
 ### Training Data Creation and Annotation
 For creating new training data crops, files and a training set need to be selected. Open the training data menu with the corresponding button:
@@ -66,9 +62,7 @@ Per default, only a maximum of 40% of the frames of an experiment and maximum 30
 
 The pre-labeling option is only available if some trained models are available (see section below). Users can specify to which subset selected crops can be assigned (only relevant for experts, just keep the default if you do not know what that means). The crop creation is interactive and crops from different image areas (of the same frame) are proposed:
 
-![crop creation](doc/crop_creation_01.png)
-
-![crop creation](doc/crop_creation_02.png)
+![crop creation](doc/crop_creation.gif)
 
 Crops can be selected by clicking on the corresponding image or using shortcuts (1: first image, 2: second image, 3: third image, space: select/next).
 
@@ -141,7 +135,6 @@ Press F1 to open a short help.
 - We recommend using the OMERO.web client for viewing the data and results (the OMERO.insight clients does not show ROI planes correctly)
 
 ## Acknowledgments
-
 * [https://github.com/vqdang/hover_net](https://github.com/vqdang/hover_net) (aggregated Jaccard index implementation)
 * [https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer](https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer) (Ranger optimizer)
 * [https://git.scc.kit.edu/KIT-Sch-GE/2021_segmentation](https://git.scc.kit.edu/KIT-Sch-GE/2021_segmentation) (segmentation method)
@@ -150,8 +143,7 @@ Press F1 to open a short help.
 A segmentation dataset with *E. coli* and *B. subtilis* training data is available at https://doi.org/10.5281/zenodo.6497715.
 
 ## Publication
-T. Scherr et al (2022): microbeSEG: Accurate cell segmentation with OMERO data management, *to be submitted*. 
+T. Scherr et al (2022): microbeSEG: Accurate cell segmentation with OMERO data management, bioRxiv, [doi:10.1101/2022.04.29.489998v1](https://www.biorxiv.org/content/10.1101/2022.04.29.489998v1). 
 
 ## License
-
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
