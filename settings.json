@@ -2,5 +2,5 @@
   "omero_username": "",
   "omero_host": "localhost",
   "omero_port": "4064",
-  "annotation_tool_url": "http://localhost:8080"
+  "annotation_tool_url": "http://localhost:80"
 }
