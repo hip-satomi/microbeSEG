@@ -87,9 +87,21 @@ class ResultExportWorker(QObject):
                 self.connect()
                 img_ome = self.conn.getObject("Image", img_id)
 
+            # When using copy & paste in omero, only links are created and the parent project may be not clear
+            parents = img_ome.listParents()
+            if len(parents) > 1:
+                parent_projects = []
+                for pp in parents:
+                    if isinstance(pp.getParent(), omero.gateway.ProjectWrapper):
+                        parent_projects.append(pp.getParent().getName())
+                    else:
+                        parent_projects.append(pp.getName())
+            else:
+                parent_projects = img_ome.getProject().getName()
+
             # Check if z stack
             if img_ome.getSizeZ() > 1:
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} (is z-stack)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (is z-stack)')
                 continue
 
             self.progress.emit(int(100 * ((i + 1 / 10) / len(self.img_id_list))))
@@ -133,8 +145,7 @@ class ResultExportWorker(QObject):
                 mask = mask.astype(np.uint16)
 
             if np.max(mask) == 0:
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} '
-                                      f'(no segmentation results found)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no segmentation results found)')
                 continue
 
             # Get image
@@ -180,7 +191,10 @@ class ResultExportWorker(QObject):
             self.progress.emit(int(100 * ((i + 3 / 4) / len(self.img_id_list))))
 
             # Save image, mask and label
-            result_path = self.inference_path / img_ome.getProject().getName()
+            if isinstance(parent_projects, list):
+                result_path = self.inference_path / parent_projects[0]
+            else:
+                result_path = self.inference_path / img_ome.getProject().getName()
             result_path.mkdir(exist_ok=True)
             fname = result_path / img_ome.getName()
             tiff.imwrite(str(result_path / f"{fname.stem}.tif"), img, compress=1)

@@ -141,20 +141,30 @@ class InferWorker(QObject):
                 self.connect()
                 img_ome = self.conn.getObject("Image", img_id)
 
+            # When using copy & paste in omero, only links are created and the parent project may be not clear
+            parents = img_ome.listParents()
+            if len(parents) > 1:
+                parent_projects = []
+                for pp in parents:
+                    if isinstance(pp.getParent(), omero.gateway.ProjectWrapper):
+                        parent_projects.append(pp.getParent().getName())
+                    else:
+                        parent_projects.append(pp.getName())
+            else:
+                parent_projects = img_ome.getProject().getName()
+
             if not self.conn.canWrite(img_ome):
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} '
-                                      f'(no write permission)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no write permission)')
                 continue
 
             # Check if z stack
             if img_ome.getSizeZ() > 1:
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} (is z-stack)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (is z-stack)')
                 continue
 
             # Get image from Omero
             if self.channel + 1 > img_ome.getSizeC():
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} '
-                                      f'(not enough channels found)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (not enough channels found)')
                 continue
 
             # Check if results exist and should not be overwritten
@@ -185,18 +195,24 @@ class InferWorker(QObject):
                         self.conn.deleteObjects('Annotation', to_delete, wait=True)
 
             else:  # Check if local results are available
-                result_path = self.inference_path / img_ome.getProject().getName()
+                if isinstance(parent_projects, list):
+                    result_path = self.inference_path / parent_projects[0]
+                else:
+                    result_path = self.inference_path / img_ome.getProject().getName()
                 fname = result_path / img_ome.getName()
                 if (result_path / f"{fname.stem}_channel{self.channel}.tif").is_file():
                     already_processed = True
 
             if already_processed and not self.overwrite:
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} '
-                                      f'(already processed and overwriting not enabled)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (already processed and '
+                                      f'overwriting not enabled)')
                 continue
 
             if not self.upload:
-                result_path = self.inference_path / img_ome.getProject().getName()
+                if isinstance(parent_projects, list):
+                    result_path = self.inference_path / parent_projects[0]
+                else:
+                    result_path = self.inference_path / img_ome.getProject().getName()
                 result_path.mkdir(exist_ok=True)
 
             # Pre-allocate array for results

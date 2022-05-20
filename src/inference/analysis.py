@@ -89,14 +89,25 @@ class AnalysisWorker(QObject):
                 self.connect()
                 img_ome = self.conn.getObject("Image", img_id)
 
+            # When using copy & paste in omero, only links are created and the parent project may be not clear
+            parents = img_ome.listParents()
+            if len(parents) > 1:
+                parent_projects = []
+                for pp in parents:
+                    if isinstance(pp.getParent(), omero.gateway.ProjectWrapper):
+                        parent_projects.append(pp.getParent().getName())
+                    else:
+                        parent_projects.append(pp.getName())
+            else:
+                parent_projects = img_ome.getProject().getName()
+
             if not self.conn.canWrite(img_ome):
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} '
-                                      f'(no write permission)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no write permission)')
                 continue
 
             # Check if z stack
             if img_ome.getSizeZ() > 1:
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} (is z-stack)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (is z-stack)')
                 continue
 
             self.progress.emit(int(100 * ((i + 1 / 10) / len(self.img_id_list))))
@@ -133,8 +144,7 @@ class AnalysisWorker(QObject):
                 mask = mask.astype(np.uint16)
 
             if np.max(mask) == 0:
-                self.text_output.emit(f'  Skip {img_ome.getProject().getName()}: {img_ome.getName()} '
-                                      f'(no segmentation results found)')
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no segmentation results found)')
                 continue
 
             # Analyze
@@ -161,7 +171,10 @@ class AnalysisWorker(QObject):
 
             # Convert to pandas data frame and save temporarily (needed for upload)
             results_df = pd.DataFrame(results)
-            result_path = self.results_path / img_ome.getProject().getName()
+            if isinstance(parent_projects, list):
+                result_path = self.results_path / parent_projects[0]
+            else:
+                result_path = self.results_path / img_ome.getProject().getName()
             fname = result_path / img_ome.getName()
             results_df.to_csv(self.results_path / f"{fname.stem}_analysis.csv", index=False)
 
