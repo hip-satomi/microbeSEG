@@ -104,7 +104,7 @@ class MicrobeSegMainWindow(QWidget):
         # Selected omero training set
         self.trainset, self.trainset_id, self.trainset_project_id, self.trainset_length = None, None, None, 0
         # Color channel
-        self.color_channel = 0
+        self.color_channel = 'rgb'
         # List of available trained models
         self.trained_model_list = []
         # Crop selection
@@ -216,10 +216,13 @@ class MicrobeSegMainWindow(QWidget):
         self.color_channel_label.setMinimumWidth(70)
         self.color_channel_1_rbutton, self.color_channel_2_rbutton = QRadioButton("1"), QRadioButton("2")
         self.color_channel_3_rbutton = QRadioButton("3")
-        self.color_channel_1_rbutton.setChecked(True)
+        self.color_channel_rgb_rbutton = QRadioButton("rgb")
+        self.color_channel_rgb_rbutton.setChecked(True)
+        self.color_channel_1_rbutton.setVisible(False), self.color_channel_2_rbutton.setVisible(False)
+        self.color_channel_3_rbutton.setVisible(False)
         color_group = QButtonGroup(self)
         color_group.addButton(self.color_channel_1_rbutton), color_group.addButton(self.color_channel_2_rbutton)
-        color_group.addButton(self.color_channel_3_rbutton)
+        color_group.addButton(self.color_channel_3_rbutton), color_group.addButton(self.color_channel_rgb_rbutton)
 
         # Settings box: group selection menu
         self.group_list = QListWidget()
@@ -616,10 +619,12 @@ class MicrobeSegMainWindow(QWidget):
         # Settings box: Color channel selection layout
         settings_box = QGroupBox("Settings")
         color_channel_layout = QHBoxLayout()
+        color_channel_layout.setAlignment(Qt.AlignLeft)
         color_channel_layout.addWidget(self.color_channel_label)
         color_channel_layout.addWidget(self.color_channel_1_rbutton)
         color_channel_layout.addWidget(self.color_channel_2_rbutton)
         color_channel_layout.addWidget(self.color_channel_3_rbutton)
+        color_channel_layout.addWidget(self.color_channel_rgb_rbutton)
 
         # Settings box: device selection layout
         device_layout = QHBoxLayout()
@@ -1113,6 +1118,8 @@ class MicrobeSegMainWindow(QWidget):
             self.color_channel = 1
         elif self.color_channel_3_rbutton.isChecked():
             self.color_channel = 2
+        elif self.color_channel_rgb_rbutton.isChecked():
+            self.color_channel = 'rgb'
 
     @staticmethod
     def get_crop_key_value_data(crop_dict):
@@ -2227,9 +2234,11 @@ class MicrobeSegMainWindow(QWidget):
             if img.getSizeZ() > 1 or img.getSizeX() < 0.9 * self.crop_size or img.getSizeY() < 0.9 * self.crop_size:
                 continue
 
-            # Less color channels available than available --> skip
-            if self.color_channel > 0 and img.getSizeC() == 1:
+            # Less color channels available than required --> skip
+            if img.getSizeT < 3:
                 continue
+            # if self.color_channel > 0 and img.getSizeC() == 1:
+            #     continue
 
             # Go through selected frames and check if already been used
             for frame in frames:
