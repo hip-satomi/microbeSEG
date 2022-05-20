@@ -2255,12 +2255,14 @@ class MicrobeSegMainWindow(QWidget):
                                   'frame': frame,
                                   'channel': self.color_channel})
         if len(crop_list) == 0:
-            self.output_edit.append('No supported files found. Check color channel or if z-stacks were selected.'
+            self.output_edit.append('No supported files found. Check color channel or if z-stacks were selected. '
                                     'The selected files may also be too small for the selected crop size. It may also '
                                     'be the case that from each selected file/frame already crops were extracted.')
 
             if self.is_ready():
                 self.status_bar.showMessage('Ready')
+
+            crop_list_progressbar.close()
 
             return
 
