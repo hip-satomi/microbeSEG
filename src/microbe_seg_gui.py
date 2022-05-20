@@ -2227,7 +2227,7 @@ class MicrobeSegMainWindow(QWidget):
             if img.getSizeZ() > 1 or img.getSizeX() < 0.9 * self.crop_size or img.getSizeY() < 0.9 * self.crop_size:
                 continue
 
-            # Less color channels available than available --> skip
+            # Less color channels available than required --> skip
             if self.color_channel > 0 and img.getSizeC() == 1:
                 continue
 
@@ -2246,12 +2246,14 @@ class MicrobeSegMainWindow(QWidget):
                                   'frame': frame,
                                   'channel': self.color_channel})
         if len(crop_list) == 0:
-            self.output_edit.append('No supported files found. Check color channel or if z-stacks were selected.'
+            self.output_edit.append('No supported files found. Check color channel or if z-stacks were selected. '
                                     'The selected files may also be too small for the selected crop size. It may also '
                                     'be the case that from each selected file/frame already crops were extracted.')
 
             if self.is_ready():
                 self.status_bar.showMessage('Ready')
+
+            crop_list_progressbar.close()
 
             return
 
