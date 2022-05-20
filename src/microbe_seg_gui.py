@@ -27,7 +27,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal, pyqtSlot
 from src.utils.data_cropping import DataCropWorker
 from src.utils.data_export import DataExportWorker
 from src.utils.data_import import DataImportWorker, create_roi
-from src.utils.utils import plane_gen
+from src.utils.utils import plane_gen_rgb
 from src.evaluation.eval import EvalWorker
 from src.inference.analysis import AnalysisWorker
 from src.inference.infer import InferWorker
@@ -2235,7 +2235,7 @@ class MicrobeSegMainWindow(QWidget):
                 continue
 
             # Less color channels available than required --> skip
-            if img.getSizeT < 3:
+            if img.getSizeC() < 3:
                 continue
             # if self.color_channel > 0 and img.getSizeC() == 1:
             #     continue
@@ -2359,7 +2359,7 @@ class MicrobeSegMainWindow(QWidget):
             qimage = QImage(crops[i]['img_show'],
                             crops[i]['img_show'].shape[1],
                             crops[i]['img_show'].shape[0],
-                            QImage.Format_Indexed8)
+                            QImage.Format_RGB888)
             pixmap = QPixmap.fromImage(qimage)
             # Scaling directly to available space produces for some image sizes artifacts for the roi overlay
             if (self.screen_height - self.crop_size) < 250:
@@ -2702,9 +2702,9 @@ class MicrobeSegMainWindow(QWidget):
                 continue
 
             try:
-                omero_img = self.conn.createImageFromNumpySeq(plane_gen(crop_dict['img']),
+                omero_img = self.conn.createImageFromNumpySeq(plane_gen_rgb(crop_dict['img']),
                                                               "img_{:03d}.tif".format(self.split_info['num_acc']),
-                                                              1, 1, 1,
+                                                              1, 3, 1,
                                                               description='training image crop',
                                                               dataset=self.conn.getObject("Dataset", self.trainset_id))
             except Exception as e:  # probably timeout  --> reconnect and try again
@@ -2713,9 +2713,9 @@ class MicrobeSegMainWindow(QWidget):
                 if not conn_status:
                     self.select_crops.close()
                     return
-                omero_img = self.conn.createImageFromNumpySeq(plane_gen(crop_dict['img']),
+                omero_img = self.conn.createImageFromNumpySeq(plane_gen_rgb(crop_dict['img']),
                                                               "img_{:03d}.tif".format(self.split_info['num_acc']),
-                                                              1, 1, 1,
+                                                              1, 3, 1,
                                                               description='training image crop',
                                                               dataset=self.conn.getObject("Dataset", self.trainset_id))
 
@@ -2751,7 +2751,7 @@ class MicrobeSegMainWindow(QWidget):
                 update_service = self.conn.getUpdateService()
                 omero_img = self.conn.getObject("Image", omero_img.getId())  # Reload needed
                 mask_polygon = omero.model.PolygonI()
-                mask_polygon.theZ, mask_polygon.theT, mask_polygon.fillColor = rint(0), rint(0), rint(0)
+                mask_polygon.theZ, mask_polygon.theT, mask_polygon.fillColor = rint(0), rint(0), rint(0)  # ToDo: add to first channels? what does obiwan-microbi?
                 mask_polygon.strokeColor = rint(int.from_bytes([255, 255, 0, 255], byteorder='big', signed=True))
                 mask_polygon_list = []
                 for roi in crop_dict['roi']:

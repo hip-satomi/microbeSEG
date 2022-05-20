@@ -144,15 +144,24 @@ class DataCropWorker(QObject):
 
             # Load image from omero
             try:
-                img = self.conn.getObject("Image", self.img_list[self.img_idx]['id'])
+                img_ome = self.conn.getObject("Image", self.img_list[self.img_idx]['id'])
             except Exception as e:  # probably timeout  --> reconnect and try again
                 self.disconnect()
                 self.connect()
-                img = self.conn.getObject("Image", self.img_list[self.img_idx]['id'])
+                img_ome = self.conn.getObject("Image", self.img_list[self.img_idx]['id'])
 
-            img = img.getPrimaryPixels().getPlane(0,
-                                                  self.img_list[self.img_idx]['channel'],
-                                                  self.img_list[self.img_idx]['frame'])
+            if isinstance(self.img_list[self.img_idx]['channel'], int):
+                img = img_ome.getPrimaryPixels().getPlane(0,
+                                                          self.img_list[self.img_idx]['channel'],
+                                                          self.img_list[self.img_idx]['frame'])
+            else:
+                img = np.zeros(shape=(img_ome.getSizeY(), img_ome.getSizeX(), img_ome.getSizeC()), dtype=np.uint16)
+                zct_list = []
+                for z in range(img_ome.getSizeZ()):  # all slices (1 anyway)
+                    for c in range(img_ome.getSizeC()):  # all channels
+                        zct_list.append((z, c, self.img_list[self.img_idx]['frame']))
+                for h, plane in enumerate(img_ome.getPrimaryPixels().getPlanes(zct_list)):
+                    img[:, :, zct_list[h][1]] = plane
 
             # Check which dimension is larger --> crop_dimension
             if img.shape[0] > img.shape[1]:
@@ -177,7 +186,7 @@ class DataCropWorker(QObject):
                 continue
             x_pads = np.maximum(0, self.crop_size - img.shape[1])
             y_pads = np.maximum(0, self.crop_size - img.shape[0])
-            img = np.pad(img, ((0, y_pads), (0, x_pads)), mode='constant', constant_values=img_min)
+            img = np.pad(img, ((0, y_pads), (0, x_pads), (0, 0)), mode='constant', constant_values=img_min)
 
             # Get crop starting points
             crops = []
@@ -199,7 +208,7 @@ class DataCropWorker(QObject):
                     a, b = 0, 0
 
                 # Crop
-                crop = img[a:a + self.crop_size, b:b + self.crop_size]
+                crop = img[a:a + self.crop_size, b:b + self.crop_size, ...]
 
                 # In gui shown crop
                 crop_show = 255 * (crop.astype(np.float32) - img_min) / (img_max - img_min)
@@ -208,9 +217,11 @@ class DataCropWorker(QObject):
                 if self.pre_labeling:
 
                     # Predict crop
+                    # ToDo: adapt inference/model loading/model training
                     prediction = self.inference(crop, min_val=img_min, max_val=img_max)
 
                     # Get polygon coordinates for uploading --> roi
+                    # ToDo: get rid of channels
                     roi_show = np.concatenate((crop_show[..., None], crop_show[..., None], crop_show[..., None]),
                                               axis=-1)
                     # Create polygon ROIs for each cell
@@ -258,7 +269,7 @@ class DataCropWorker(QObject):
                               'pre_labeled': str(False),  # Set to true when segmentation has been selected
                               'x_start': str(b),
                               'y_start': str(a),
-                              'img': img[a:a + self.crop_size, b:b + self.crop_size],
+                              'img': img[a:a + self.crop_size, b:b + self.crop_size, ...],
                               'img_show': crop_show,
                               'roi': roi,
                               'roi_show': roi_show})

@@ -8,6 +8,12 @@ def plane_gen(img):
         yield p
 
 
+def plane_gen_rgb(img):
+    """generator will yield planes"""
+    for p in [img[..., 0], img[..., 1], img[..., 2]]:
+        yield p
+
+
 def get_nucleus_ids(img):
     """ Get nucleus ids in intensity-coded label image.
 
