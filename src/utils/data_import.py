@@ -99,10 +99,19 @@ class DataImportWorker(QObject):
                 continue
 
             # Discard 3D images and convert rgb/multi-channel images to grayscale
-            if len(img.shape) and img.shape[-1] <= 3:
-                img = np.mean(img, axis=-1).astype(img.dtype)
-                self.text_output.emit("  {}: rgb image converted to grayscale".format(img_id.name))
-            if len(img.shape) >= 3:
+            # ToDo: rgb image, skip grayscale image, skip multi-channel masks
+            if len(img.shape) == 3:
+                if img.shape[-1] == 3:  # channels last
+                    pass
+                elif img.shape[0] == 3:  # channels first
+                    img = np.transpose(img, (1, 2, 0))
+                else:
+                    self.text_output.emit("  {}: no rgb image --> skip".format(img_id.name))
+                    continue
+            elif len(img.shape) < 3:
+                self.text_output.emit("  {}: no rgb image --> skip".format(img_id.name))
+                continue
+            elif len(img.shape) > 3:
                 self.text_output.emit("  {}: 3D image --> skip".format(img_id.name))
                 continue
 
@@ -124,7 +133,8 @@ class DataImportWorker(QObject):
                 self.text_output.emit("  {}: too much pads needed --> skip".format(img_id.name))
                 continue
             img = np.pad(img, ((int(np.ceil(pads[0]/2)), int(np.floor(pads[0]/2))),
-                               (int(np.ceil(pads[1]/2)), int(np.floor(pads[1]/2)))),
+                               (int(np.ceil(pads[1]/2)), int(np.floor(pads[1]/2))),
+                               (0, 0)),
                          mode='constant')
             mask = np.pad(mask, ((int(np.ceil(pads[0]/2)), int(np.floor(pads[0]/2))),
                                  (int(np.ceil(pads[1]/2)), int(np.floor(pads[1]/2)))),
@@ -144,8 +154,8 @@ class DataImportWorker(QObject):
                     img = img[int(np.floor(border_y)):int(np.floor(-border_y)), ...]
                     mask = mask[int(np.floor(border_y)):int(np.floor(-border_y)), ...]
                 if border_x > 0:  # crop is in x direction
-                    img = img[:, int(np.floor(border_x)):int(np.floor(-border_x))]
-                    mask = mask[:, int(np.floor(border_x)):int(np.floor(-border_x))]
+                    img = img[:, int(np.floor(border_x)):int(np.floor(-border_x)), ...]
+                    mask = mask[:, int(np.floor(border_x)):int(np.floor(-border_x)), ...]
 
                 num_cells, area_cells = len(utils.get_nucleus_ids(mask)), np.sum(mask > 0)
 
@@ -154,8 +164,8 @@ class DataImportWorker(QObject):
                     for w in range(num_crops_x):
 
                         y_start, x_start = h * crop_size, w * crop_size
-                        img_crop = img[y_start:y_start+crop_size, x_start:x_start+crop_size]
-                        mask_crop = mask[y_start:y_start + crop_size, x_start:x_start + crop_size]
+                        img_crop = img[y_start:y_start+crop_size, x_start:x_start+crop_size, ...]
+                        mask_crop = mask[y_start:y_start + crop_size, x_start:x_start + crop_size, ...]
 
                         # avoid empty crops (or crops with only very few information)
                         num_cells_crop = len(utils.get_nucleus_ids(mask_crop))
@@ -181,9 +191,9 @@ class DataImportWorker(QObject):
             for img, mask, x_start, y_start in img_list:
 
                 # Upload image, increase counter for file naming and update progress
-                omero_img = conn.createImageFromNumpySeq(utils.plane_gen(img),
+                omero_img = conn.createImageFromNumpySeq(utils.plane_gen_rgb(img),
                                                          "img_ext{:03d}.tif".format(split_info['num_ext']),
-                                                         1, 1, 1,
+                                                         1, 3, 1,
                                                          description='imported training image crop',
                                                          dataset=conn.getObject("Dataset", trainset_id))
 
@@ -199,7 +209,7 @@ class DataImportWorker(QObject):
                                   ["image", "ext_{}".format(img_id.name)],
                                   ["image_id", "imported"],
                                   ["frame", str(0)],
-                                  ["channel", str(0)],
+                                  ["channel", 'rgb'],
                                   ["pre_labeled", str(False)],
                                   ["x_start", str(x_start)],
                                   ["y_start", str(y_start)],
