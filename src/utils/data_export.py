@@ -106,8 +106,8 @@ class DataExportWorker(QObject):
                 for h, plane in enumerate(file.getPrimaryPixels().getPlanes(zct_list)):
                     img[:, :, zct_list[h][1]] = plane
             else:
-                self.text_output.emit("Not a rgb data set --> break.")
-                break
+                self.text_output.emit("   {}: no rgb image --> skip.")
+                continue
 
             # Normalization
             img = 65535 * (img.astype(np.float32) - frame_min) / (frame_max - frame_min)
