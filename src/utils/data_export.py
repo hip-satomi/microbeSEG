@@ -95,8 +95,21 @@ class DataExportWorker(QObject):
                 self.text_output.emit("   {}: pre-labeled but not corrected --> skip.".format(file.getName()))
                 continue
 
+            # Get image
+            if file.getSizeC() > 1:
+                img = np.zeros(shape=(file.getSizeY(), file.getSizeX(), file.getSizeC()))
+                zct_list = []
+                for z in range(file.getSizeZ()):  # all slices (1 anyway)
+                    for c in range(file.getSizeC()):  # all channels
+                        for t in range(file.getSizeT()):  # all time-points (1 anyway)
+                            zct_list.append((z, c, t))
+                for h, plane in enumerate(file.getPrimaryPixels().getPlanes(zct_list)):
+                    img[:, :, zct_list[h][1]] = plane
+            else:
+                self.text_output.emit("Not a rgb data set --> break.")
+                break
+
             # Normalization
-            img = file.getPrimaryPixels().getPlane(0, 0, 0)
             img = 65535 * (img.astype(np.float32) - frame_min) / (frame_max - frame_min)
             img = np.clip(img, 0, 65535).astype(np.uint16)
 
