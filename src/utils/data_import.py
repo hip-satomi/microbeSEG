@@ -99,7 +99,6 @@ class DataImportWorker(QObject):
                 continue
 
             # Discard 3D images and convert rgb/multi-channel images to grayscale
-            # ToDo: rgb image, skip grayscale image, skip multi-channel masks
             if len(img.shape) == 3:
                 if img.shape[-1] == 3:  # channels last
                     pass
@@ -152,10 +151,10 @@ class DataImportWorker(QObject):
 
                 if border_y > 0:  # crop is in y direction
                     img = img[int(np.floor(border_y)):int(np.floor(-border_y)), ...]
-                    mask = mask[int(np.floor(border_y)):int(np.floor(-border_y)), ...]
+                    mask = mask[int(np.floor(border_y)):int(np.floor(-border_y))]
                 if border_x > 0:  # crop is in x direction
                     img = img[:, int(np.floor(border_x)):int(np.floor(-border_x)), ...]
-                    mask = mask[:, int(np.floor(border_x)):int(np.floor(-border_x)), ...]
+                    mask = mask[:, int(np.floor(border_x)):int(np.floor(-border_x))]
 
                 num_cells, area_cells = len(utils.get_nucleus_ids(mask)), np.sum(mask > 0)
 
@@ -165,7 +164,7 @@ class DataImportWorker(QObject):
 
                         y_start, x_start = h * crop_size, w * crop_size
                         img_crop = img[y_start:y_start+crop_size, x_start:x_start+crop_size, ...]
-                        mask_crop = mask[y_start:y_start + crop_size, x_start:x_start + crop_size, ...]
+                        mask_crop = mask[y_start:y_start + crop_size, x_start:x_start + crop_size]
 
                         # avoid empty crops (or crops with only very few information)
                         num_cells_crop = len(utils.get_nucleus_ids(mask_crop))
@@ -186,6 +185,8 @@ class DataImportWorker(QObject):
                 import_set = 'val'
             else:
                 import_set = 'train'
+
+            print(len(img_list))
 
             # Import
             for img, mask, x_start, y_start in img_list:
