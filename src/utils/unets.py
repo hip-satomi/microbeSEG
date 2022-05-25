@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch import tanh
 
 
-def build_unet(unet_type, act_fun, pool_method, normalization, device, num_gpus, ch_in=1, ch_out=1, filters=(64, 1024)):
+def build_unet(unet_type, act_fun, pool_method, normalization, device, num_gpus, ch_in=3, ch_out=1, filters=(64, 1024)):
     """ Build U-net architecture.
 
     :param unet_type: 'U' (U-net) or 'DU' (U-net with two decoder paths and two outputs).

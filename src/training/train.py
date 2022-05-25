@@ -121,7 +121,8 @@ class TrainWorker(QObject):
     stop_training = False  # Stop training process
     is_training = False  # State of training process
 
-    def start_training(self, path_data, path_models, label_type, iterations, optimizer, batch_size, device, num_gpus):
+    def start_training(self, path_data, path_models, label_type, iterations, optimizer, batch_size, device, num_gpus,
+                       apply_hue_aug):
         """ Start training process
 
         :param path_data: Path of the training set (contains dirs 'train', and 'val')
@@ -188,6 +189,7 @@ class TrainWorker(QObject):
                                          'loss': 'smooth_l1' if label_type == 'distance' else 'ce_dice',
                                          'num_gpus': num_gpus,
                                          'optimizer': optimizer,
+                                         'rgb': True,
                                          'run_name': run_name}
 
                         # Build CNN
@@ -197,14 +199,15 @@ class TrainWorker(QObject):
                                          normalization=train_configs['architecture'][3],
                                          device=device,
                                          num_gpus=num_gpus,
-                                         ch_in=1,
+                                         ch_in=3,
                                          ch_out=1 if label_type == 'distance' else 3,
                                          filters=train_configs['architecture'][4])
 
                         # Load training and validation set
                         data_transforms = augmentors(label_type=train_configs['label_type'],
                                                      min_value=0,  # data are already normalized
-                                                     max_value=65535)
+                                                     max_value=65535,
+                                                     apply_hue_aug=apply_hue_aug)
                         train_configs['data_transforms'] = str(data_transforms)
                         datasets = {x: TrainingDataset(root_dir=path_data,
                                                        label_type=label_type,
@@ -230,7 +233,7 @@ class TrainWorker(QObject):
                                              normalization=train_configs['architecture'][3],
                                              device=device,
                                              num_gpus=num_gpus,
-                                             ch_in=1,
+                                             ch_in=3,
                                              ch_out=1 if label_type == 'distance' else 3,
                                              filters=train_configs['architecture'][4])
                             # Get best weights as starting point

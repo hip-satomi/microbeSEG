@@ -1,15 +1,14 @@
 import numpy as np
 import random
-import scipy
 import torch
 from imgaug import augmenters as iaa
-from skimage.exposure import equalize_adapthist, rescale_intensity
+from skimage.filters import gaussian
 from torchvision import transforms
 
 from src.utils.utils import min_max_normalization
 
 
-def augmentors(label_type, min_value, max_value):
+def augmentors(label_type, min_value, max_value, apply_hue_aug=False):
     """ Get augmentations for the training process.
 
     :param label_type: Type of the label images, e.g., 'boundary' or 'distance'.
@@ -21,16 +20,29 @@ def augmentors(label_type, min_value, max_value):
     :return: Dict of augmentations.
     """
 
-    data_transforms = {'train': transforms.Compose([Flip(p=1.0),
-                                                    Contrast(p=0.45),
-                                                    Scaling(p=0.25),
-                                                    Rotate(p=0.25),
-                                                    Blur(p=0.3),
-                                                    Noise(p=0.3),
-                                                    ToTensor(label_type=label_type,
-                                                             min_value=min_value,
-                                                             max_value=max_value)]),
-                       'val': ToTensor(label_type=label_type, min_value=min_value, max_value=max_value)}
+    if apply_hue_aug:
+        data_transforms = {'train': transforms.Compose([Flip(),
+                                                        Color(p=0.55),
+                                                        Contrast(p=0.25),
+                                                        Scaling(p=0.25),
+                                                        Rotate(p=0.25),
+                                                        Blur(p=0.33),
+                                                        Noise(p=0.33),
+                                                        ToTensor(label_type=label_type,
+                                                                 min_value=min_value,
+                                                                 max_value=max_value)]),
+                           'val': ToTensor(label_type=label_type, min_value=min_value, max_value=max_value)}
+    else:
+        data_transforms = {'train': transforms.Compose([Flip(),
+                                                        Contrast(p=0.25),
+                                                        Scaling(p=0.25),
+                                                        Rotate(p=0.25),
+                                                        Blur(p=0.33),
+                                                        Noise(p=0.33),
+                                                        ToTensor(label_type=label_type,
+                                                                 min_value=min_value,
+                                                                 max_value=max_value)]),
+                           'val': ToTensor(label_type=label_type, min_value=min_value, max_value=max_value)}
 
     return data_transforms
 
@@ -45,7 +57,7 @@ class Blur(object):
             :type p: float
         """
         self.p = p
-        
+
     def __call__(self, sample):
         """
 
@@ -55,10 +67,48 @@ class Blur(object):
         """
 
         if random.random() < self.p:
+            input_img_dtype = sample['image'].dtype
+            input_img_max = np.iinfo(input_img_dtype).max
+            sigma = 0.5 * random.random() + 0.4
+            sample['image'] = np.round(
+                gaussian(sample["image"], sigma=sigma, channel_axis=-1) * input_img_max
+            ).astype(input_img_dtype)
 
-            sigma = random.random() + 1.0
-            sample['image'] = scipy.ndimage.gaussian_filter(sample['image'], sigma, order=0)
-        
+        return sample
+
+
+class Color(object):
+    """ Color augmentation (label-preserving transformation) """
+
+    def __init__(self, p=1):
+        """
+
+        param p: Probability to apply augmentation to an image.
+            :type p: float
+        """
+        self.p = p
+
+    def __call__(self, sample):
+        """
+
+        :param sample: Dictionary containing image and label image (numpy arrays).
+            :type sample: dict
+        :return: Dictionary containing augmented image and label image (numpy arrays).
+        """
+
+        if random.random() < self.p:
+            # augmenter that adds a random value sampled uniformly from the range [-20, 20] to the hue and multiplies
+            # the saturation by a random factor sampled uniformly from [0.725, 1.275]. It also modifies the contrast of
+            # the saturation channel. After these steps, the HSV image is converted back to RGB.
+            img = np.clip(255 * sample['image'].astype(np.float32) / 65535, 0, 255).astype(np.uint8)
+            seq = iaa.Sequential([iaa.WithHueAndSaturation([iaa.WithChannels(0, iaa.Add((-22, 22))),
+                                                            iaa.WithChannels(1, [iaa.Multiply((0.7, 1.3)),
+                                                                                 iaa.LinearContrast((0.7, 1.2))
+                                                                                 ])
+                                                            ])
+                                  ])
+            sample['image'] = np.clip(65535 * seq.augment_image(img).astype(np.float32) / 255, 0, 65535).astype(np.uint16)
+
         return sample
 
 
@@ -72,7 +122,7 @@ class Contrast(object):
             :type p: float
         """
         self.p = p
-        
+
     def __call__(self, sample):
         """
 
@@ -83,45 +133,29 @@ class Contrast(object):
 
         if random.random() < self.p:
 
-            img = sample['image']
+            input_img_dtype = sample['image'].dtype
+            input_img_min, input_img_max = np.iinfo(input_img_dtype).min, np.iinfo(input_img_dtype).max
 
-            h = random.randint(0, 2)
+            sample['image'] = (sample['image'].astype(np.float32) - input_img_min) / (input_img_max - input_img_min)
+            # Really small changes only (otherwise may affect classification)
+            contrast_range, gamma_range = (0.9, 1.05), (0.9, 1.05)
 
-            if h == 0:  # Apply CLAHE or contrast stretching
+            # Contrast
+            img_mean, img_min, img_max = sample['image'].mean(), sample['image'].min(), sample['image'].max()
+            factor = np.random.uniform(contrast_range[0], contrast_range[1])
+            sample['image'] = (sample['image'] - img_mean) * factor + img_mean
 
-                img = equalize_adapthist(np.squeeze(img), clip_limit=0.01)
-                img = (65535 * img[..., None]).astype(np.uint16)
-
-            elif h == 1:  # Contrast stretching
-
-                if random.randint(0, 1) == 0:
-                    p0, p1 = np.percentile(img, (0.2, 99.8))
-                else:
-                    p0, p1 = np.percentile(img, (0.1, 99.9))
-                img = rescale_intensity(img, in_range=(p0, p1))
-
-            else:  # Apply Contrast and gamma adjustment
-
-                dtype = img.dtype
-                img = (img.astype(np.float32) - np.iinfo(dtype).min) / (np.iinfo(dtype).max - np.iinfo(dtype).min)
-                contrast_range, gamma_range = (0.75, 1.25), (0.7, 1.3)
-
-                # Contrast
-                img_mean, img_min, img_max = img.mean(), img.min(), img.max()
-                factor = np.random.uniform(contrast_range[0], contrast_range[1])
-                img = (img - img_mean) * factor + img_mean
-
-                # Gamma
-                img_mean, img_std, img_min, img_max = img.mean(), img.std(), img.min(), img.max()
+            # Gamma
+            if random.randint(0, 1) == 0:
+                img_mean, img_std, img_min, img_max = sample['image'].mean(), sample['image'].std(), sample[
+                    'image'].min(), sample['image'].max()
                 gamma = np.random.uniform(gamma_range[0], gamma_range[1])
                 rnge = img_max - img_min
-                img = np.power(((img - img_min) / float(rnge + 1e-7)), gamma) * rnge + img_min
+                sample['image'] = np.power(((sample['image'] - img_min) / float(rnge + 1e-7)), gamma) * rnge + img_min
 
-                img = np.clip(img, 0, 1)
-                img = img * (np.iinfo(dtype).max - np.iinfo(dtype).min) - np.iinfo(dtype).min
-                img = img.astype(dtype)
-
-            sample['image'] = img
+            sample['image'] = np.clip(sample['image'], 0, 1)
+            sample['image'] = sample['image'] * (input_img_max - input_img_min) - input_img_min
+            sample['image'] = np.round(sample['image']).astype(input_img_dtype)
 
         return sample
 
@@ -129,14 +163,6 @@ class Contrast(object):
 class Flip(object):
     """ Flip and rotation augmentation (label-preserving transformation). Crop needed for non-square images. """
 
-    def __init__(self, p=0.5):
-        """
-
-        param p: Probability to apply augmentation to an image.
-            :type p: float
-        """
-        self.p = p
-
     def __call__(self, sample):
         """
 
@@ -144,88 +170,84 @@ class Flip(object):
             :type sample: dict
         :return: Dictionary containing augmented image and label image (numpy arrays).
         """
-        img = sample['image']
 
-        if random.random() < self.p:
+        h = random.randint(0, 7)
 
-            h = random.randint(0, 7)
+        if h == 0:  # original image
+            pass
 
-            if h == 0:
+        elif h == 1:  # Flip left-right
 
-                pass
+            sample['image'] = np.flip(sample['image'], axis=1).copy()
+            if len(sample) == 3:
+                sample['label'] = np.flip(sample['label'], axis=1).copy()
+            elif len(sample) == 4:
+                sample['border_label'] = np.flip(sample['border_label'], axis=1).copy()
+                sample['cell_label'] = np.flip(sample['cell_label'], axis=1).copy()
 
-            elif h == 1:  # Flip left-right
+        elif h == 2:  # Flip up-down
 
-                sample['image'] = np.flip(img, axis=1).copy()
-                if len(sample) == 3:
-                    sample['label'] = np.flip(sample['label'], axis=1).copy()
-                elif len(sample) == 4:
-                    sample['border_label'] = np.flip(sample['border_label'], axis=1).copy()
-                    sample['cell_label'] = np.flip(sample['cell_label'], axis=1).copy()
+            sample['image'] = np.flip(sample['image'], axis=0).copy()
+            if len(sample) == 3:
+                sample['label'] = np.flip(sample['label'], axis=0).copy()
+            elif len(sample) == 4:
+                sample['border_label'] = np.flip(sample['border_label'], axis=0).copy()
+                sample['cell_label'] = np.flip(sample['cell_label'], axis=0).copy()
 
-            elif h == 2:  # Flip up-down
+        elif h == 3:  # Rotate 90°
 
-                sample['image'] = np.flip(img, axis=0).copy()
-                if len(sample) == 3:
-                    sample['label'] = np.flip(sample['label'], axis=0).copy()
-                elif len(sample) == 4:
-                    sample['border_label'] = np.flip(sample['border_label'], axis=0).copy()
-                    sample['cell_label'] = np.flip(sample['cell_label'], axis=0).copy()
+            sample['image'] = np.rot90(sample['image'], axes=(0, 1)).copy()
+            if len(sample) == 3:
+                sample['label'] = np.rot90(sample['label'], axes=(0, 1)).copy()
+            elif len(sample) == 4:
+                sample['border_label'] = np.rot90(sample['border_label'], axes=(0, 1)).copy()
+                sample['cell_label'] = np.rot90(sample['cell_label'], axes=(0, 1)).copy()
 
-            elif h == 3:  # Rotate 90°
+        elif h == 4:  # Rotate 180°
 
-                sample['image'] = np.rot90(img, axes=(0, 1)).copy()
-                if len(sample) == 3:
-                    sample['label'] = np.rot90(sample['label'], axes=(0, 1)).copy()
-                elif len(sample) == 4:
-                    sample['border_label'] = np.rot90(sample['border_label'], axes=(0, 1)).copy()
-                    sample['cell_label'] = np.rot90(sample['cell_label'], axes=(0, 1)).copy()
+            sample['image'] = np.rot90(sample['image'], k=2, axes=(0, 1)).copy()
+            if len(sample) == 3:
+                sample['label'] = np.rot90(sample['label'], k=2, axes=(0, 1)).copy()
+            elif len(sample) == 4:
+                sample['border_label'] = np.rot90(sample['border_label'], k=2, axes=(0, 1)).copy()
+                sample['cell_label'] = np.rot90(sample['cell_label'], k=2, axes=(0, 1)).copy()
 
-            elif h == 4:  # Rotate 180°
+        elif h == 5:  # Rotate 270°
 
-                sample['image'] = np.rot90(img, k=2, axes=(0, 1)).copy()
-                if len(sample) == 3:
-                    sample['label'] = np.rot90(sample['label'], k=2, axes=(0, 1)).copy()
-                elif len(sample) == 4:
-                    sample['border_label'] = np.rot90(sample['border_label'], k=2, axes=(0, 1)).copy()
-                    sample['cell_label'] = np.rot90(sample['cell_label'], k=2, axes=(0, 1)).copy()
+            sample['image'] = np.rot90(sample['image'], k=3, axes=(0, 1)).copy()
+            if len(sample) == 3:
+                sample['label'] = np.rot90(sample['label'], k=3, axes=(0, 1)).copy()
+            elif len(sample) == 4:
+                sample['border_label'] = np.rot90(sample['border_label'], k=3, axes=(0, 1)).copy()
+                sample['cell_label'] = np.rot90(sample['cell_label'], k=3, axes=(0, 1)).copy()
 
-            elif h == 5:  # Rotate 270°
+        elif h == 6:  # Flip left-right + rotate 90°
 
-                sample['image'] = np.rot90(img, k=3, axes=(0, 1)).copy()
-                if len(sample) == 3:
-                    sample['label'] = np.rot90(sample['label'], k=3, axes=(0, 1)).copy()
-                elif len(sample) == 4:
-                    sample['border_label'] = np.rot90(sample['border_label'], k=3, axes=(0, 1)).copy()
-                    sample['cell_label'] = np.rot90(sample['cell_label'], k=3, axes=(0, 1)).copy()
+            sample['image'] = np.flip(sample['image'], axis=1).copy()
+            sample['image'] = np.rot90(sample['image'], axes=(0, 1)).copy()
 
-            elif h == 6:  # Flip left-right + rotate 90°
+            if len(sample) == 3:
+                label_img = np.flip(sample['label'], axis=1).copy()
+                sample['label'] = np.rot90(label_img, k=1, axes=(0, 1)).copy()
+            elif len(sample) == 4:
+                border_label = np.flip(sample['border_label'], axis=1).copy()
+                cell_label = np.flip(sample['cell_label'], axis=1).copy()
+                sample['border_label'] = np.rot90(border_label, k=1, axes=(0, 1)).copy()
+                sample['cell_label'] = np.rot90(cell_label, k=1, axes=(0, 1)).copy()
 
-                img = np.flip(img, axis=1).copy()
-                sample['image'] = np.rot90(img, axes=(0, 1)).copy()
+        elif h == 7:  # Flip up-down + rotate 90°
 
-                if len(sample) == 3:
-                    label_img = np.flip(sample['label'], axis=1).copy()
-                    sample['label'] = np.rot90(label_img, k=1, axes=(0, 1)).copy()
-                elif len(sample) == 4:
-                    border_label = np.flip(sample['border_label'], axis=1).copy()
-                    cell_label = np.flip(sample['cell_label'], axis=1).copy()
-                    sample['border_label'] = np.rot90(border_label, k=1, axes=(0, 1)).copy()
-                    sample['cell_label'] = np.rot90(cell_label, k=1, axes=(0, 1)).copy()
+            sample['image'] = np.flip(sample['image'], axis=0).copy()
+            sample['image'] = np.rot90(sample['image'], axes=(0, 1)).copy()
 
-            elif h == 7:  # Flip up-down + rotate 90°
-
-                img = np.flip(img, axis=0).copy()
-                sample['image'] = np.rot90(img, axes=(0, 1)).copy()
-
-                if len(sample) == 3:
-                    label_img = np.flip(sample['label'], axis=0).copy()
-                    sample['label'] = np.rot90(label_img, k=1, axes=(0, 1)).copy()
-                elif len(sample) == 4:
-                    border_label = np.flip(sample['border_label'], axis=0).copy()
-                    cell_label = np.flip(sample['cell_label'], axis=0).copy()
-                    sample['border_label'] = np.rot90(border_label, k=1, axes=(0, 1)).copy()
-                    sample['cell_label'] = np.rot90(cell_label, k=1, axes=(0, 1)).copy()
+            if len(sample) == 3:
+                label_img = np.flip(sample['label'], axis=0).copy()
+                sample['label'] = np.rot90(label_img, k=1, axes=(0, 1)).copy()
+            elif len(sample) == 4:
+                border_label = np.flip(sample['border_label'], axis=0).copy()
+                cell_label = np.flip(sample['cell_label'], axis=0).copy()
+                sample['border_label'] = np.rot90(border_label, k=1, axes=(0, 1)).copy()
+                sample['cell_label'] = np.rot90(cell_label, k=1, axes=(0, 1)).copy()
 
         return sample
 
@@ -253,9 +275,11 @@ class Noise(object):
 
             # Add noise with sigma 1-5% of image maximum
             sigma = random.randint(1, 5) / 100 * np.max(sample['image'])
-
             # Add noise to selected images
-            seq = iaa.Sequential([iaa.AdditiveGaussianNoise(scale=sigma, per_channel=False)])
+            if random.randint(0, 1) == 0:
+                seq = iaa.Sequential([iaa.AdditiveGaussianNoise(scale=sigma, per_channel=False)])
+            else:
+                seq = iaa.Sequential([iaa.AdditiveGaussianNoise(scale=sigma, per_channel=True)])
             sample['image'] = seq.augment_image(sample['image'])
 
         return sample

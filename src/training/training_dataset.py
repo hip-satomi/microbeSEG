@@ -33,7 +33,7 @@ class TrainingDataset(Dataset):
 
         img = tiff.imread(str(img_id))
 
-        img = img[..., None]  # Channel dimension needed later (for pytorch)
+        img = img
 
         if self.label_type == 'distance':
 

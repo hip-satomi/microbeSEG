@@ -112,7 +112,7 @@ class EvalWorker(QObject):
                              normalization=model_settings['architecture'][3],
                              device=device,
                              num_gpus=num_gpus,
-                             ch_in=1,
+                             ch_in=3,
                              ch_out=1 if model_settings['label_type'] == 'distance' else 3,
                              filters=model_settings['architecture'][4])
 

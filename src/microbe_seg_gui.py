@@ -348,6 +348,7 @@ class MicrobeSegMainWindow(QWidget):
         self.train_settings_iterations_line_edit = QLineEdit('5')
         self.train_settings_iterations_line_edit.setAlignment(Qt.AlignRight)
         self.train_settings_iterations_line_edit.setValidator(QIntValidator(1, 11))
+        self.train_settings_color_aug_checkbox = QCheckBox('Color augmentation')
         self.train_settings_optimizer_label = QLabel('Optimizer:')
         self.train_settings_optimizer_adam_rbutton = QRadioButton('Adam')
         self.train_settings_optimizer_ranger_rbutton = QRadioButton('Ranger')
@@ -774,6 +775,7 @@ class MicrobeSegMainWindow(QWidget):
         train_layout = QVBoxLayout()
         train_layout.addLayout(train_batch_size_layout)
         train_layout.addLayout(train_iterations_layout)
+        train_layout.addWidget(self.train_settings_color_aug_checkbox)
         train_layout.addLayout(train_optimizer_layout)
         train_layout.addWidget(train_method_box)
         train_layout.addWidget(self.train_settings_train_button)
@@ -2652,7 +2654,8 @@ class MicrobeSegMainWindow(QWidget):
                                                   self.get_optimizer(),
                                                   int(self.train_settings_batchsize_edit.text()),
                                                   self.get_device(),
-                                                  self.get_num_gpus()))
+                                                  self.get_num_gpus(),
+                                                  self.train_settings_color_aug_checkbox.isChecked()))
         self.stop_training_sc.activated.connect(self.train_worker.stop_training_process)
         self.train_worker.text_output_main_gui.connect(self.get_worker_information)
         self.train_worker.text_output.connect(self.get_training_information)
