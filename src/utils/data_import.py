@@ -186,8 +186,6 @@ class DataImportWorker(QObject):
             else:
                 import_set = 'train'
 
-            print(len(img_list))
-
             # Import
             for img, mask, x_start, y_start in img_list:
 
