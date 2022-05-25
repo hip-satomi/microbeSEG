@@ -27,7 +27,7 @@ def run_microbe_seg():
         use_gpu = False
         num_gpus = 0
 
-    run_gui(model_path=Path(__file__).parent/'models',
+    run_gui(model_path=Path(__file__).parent/'models_rgb',
             training_data_path=Path(__file__).parent/'training_dataset',
             eval_results_path=Path(__file__).parent/'evaluation',
             inference_results_path=Path(__file__).parent/'results',
