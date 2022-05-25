@@ -1,0 +1,1 @@
+Trained models of the rgb branch are stored here.

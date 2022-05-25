@@ -1,0 +1,1 @@
+Put shared microbeSEG models (.pth and .json files) here to use them. Check if they are rgb models ("rgb"=true). Best rename them with a meaningful name.
