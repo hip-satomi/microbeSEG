@@ -22,6 +22,11 @@ conda activate microbe_seg_ve
 ```
 Change the OMERO host, the OMERO port and the ObiWan-Microbi annotation tool url in *settings.json* if necessary.
 
+If you have rgb images and you do not want to process the color channels separately, use the rgb branch:
+```
+git switch -c rgb origin/rgb
+```
+
 ## Getting Started with microbeSEG
 
 ### Start microbeSEG
