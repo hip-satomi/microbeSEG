@@ -22,6 +22,12 @@ conda activate microbe_seg_ve
 ```
 Change the OMERO host, the OMERO port and the ObiWan-Microbi annotation tool url in *settings.json* if necessary.
 
+### rgb branch
+Checkout and switch to the rgb branch (main branch only allows to select/extract channels from rgb images and provides no color information):
+```
+git switch -c rgb origin/rgb
+```
+
 ## Getting Started with microbeSEG
 
 ### Start microbeSEG
