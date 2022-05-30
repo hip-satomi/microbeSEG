@@ -86,7 +86,7 @@ class DataCropWorker(QObject):
                                   normalization=self.model_settings['architecture'][3],
                                   device=self.device,
                                   num_gpus=num_gpus,
-                                  ch_in=1,
+                                  ch_in=3,
                                   ch_out=1 if self.model_settings['label_type'] == 'distance' else 3,
                                   filters=self.model_settings['architecture'][4])
             self.net = get_weights(net=self.net,
@@ -217,19 +217,18 @@ class DataCropWorker(QObject):
                 if self.pre_labeling:
 
                     # Predict crop
-                    # ToDo: adapt inference/model loading/model training
                     prediction = self.inference(crop, min_val=img_min, max_val=img_max)
 
                     # Get polygon coordinates for uploading --> roi
                     # ToDo: get rid of channels
-                    roi_show = np.concatenate((crop_show[..., None], crop_show[..., None], crop_show[..., None]),
-                                              axis=-1)
+                    roi_show = np.copy(crop_show)
+
                     # Create polygon ROIs for each cell
                     prediction_ids = get_indices_pandas(prediction)
                     roi = []
                     if np.max(prediction) > 0:
                         try:
-                            outlines = np.zeros_like(crop, dtype=bool)
+                            outlines = np.zeros_like(crop[..., 0], dtype=bool)
                             for m_key, prediction_idx in prediction_ids.items():
                                 try:
                                     polygon_point_list = cv2_countour(prediction_idx)
@@ -295,7 +294,8 @@ class DataCropWorker(QObject):
 
         # Normalize crop and convert to tensor / img_batch
         img_batch = 2 * (crop.astype(np.float32) - min_val) / (max_val - min_val) - 1
-        img_batch = torch.from_numpy(img_batch[None, None, :, :]).to(torch.float)
+        img_batch = np.transpose(img_batch, (2, 0, 1))  # channel dimension on first place
+        img_batch = torch.from_numpy(img_batch[None, :, :]).to(torch.float)  # add batch dimension
         img_batch = img_batch.to(self.device)
 
         # Prediction
