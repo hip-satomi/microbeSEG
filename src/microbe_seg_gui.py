@@ -1543,7 +1543,7 @@ class MicrobeSegMainWindow(QWidget):
         self.inference_progress_bar.setValue(0), self.inference_progress_bar.show()
 
         # Get selected color channel
-        self.get_color_channel()
+        # self.get_color_channel()
 
         # Get worker threads and workers for data export and evaluation
         self.infer_thread = QThread(parent=self)
@@ -1558,7 +1558,7 @@ class MicrobeSegMainWindow(QWidget):
                                         self.get_device(),
                                         # self.get_num_gpus(),
                                         copy(self.inference_model_ths),
-                                        self.color_channel,
+                                        # self.color_channel,
                                         self.inference_menu_upload_checkbox.isChecked(),
                                         self.inference_menu_overwrite_checkbox.isChecked(),
                                         self.inference_menu_sliding_window_checkbox.isChecked())
@@ -2236,8 +2236,8 @@ class MicrobeSegMainWindow(QWidget):
             if img.getSizeZ() > 1 or img.getSizeX() < 0.9 * self.crop_size or img.getSizeY() < 0.9 * self.crop_size:
                 continue
 
-            # Less color channels available than required --> skip
-            if img.getSizeC() < 3:
+            # No rgb image --> skip
+            if img.getSizeC() != 3:
                 continue
             # if self.color_channel > 0 and img.getSizeC() == 1:
             #     continue

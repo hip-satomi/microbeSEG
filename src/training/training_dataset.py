@@ -33,8 +33,6 @@ class TrainingDataset(Dataset):
 
         img = tiff.imread(str(img_id))
 
-        img = img
-
         if self.label_type == 'distance':
 
             dist_label_id = img_id.parent / "cell_dist{}".format(img_id.name.split('img')[-1])

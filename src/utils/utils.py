@@ -143,8 +143,9 @@ def zero_pad_model_input(img, pad_val=0):
     tested_img_shapes = [64, 128, 256, 320, 512, 768, 1024, 1280, 1408, 1600, 1920, 2048, 2240, 2560, 3200, 4096,
                          4480, 6080, 8192]
 
-    if len(img.shape) == 3:  # 3D image (z-dimension needs no pads)
-        img = np.transpose(img, (2, 1, 0))
+    # ToDo adapt for rgb
+    # if len(img.shape) == 3:  # 3D image (z-dimension needs no pads)
+    #     img = np.transpose(img, (2, 1, 0))
 
     # More effective padding (but may lead to cuda errors)
     # y_pads = int(np.ceil(img.shape[0] / 64) * 64) - img.shape[0]
@@ -162,7 +163,7 @@ def zero_pad_model_input(img, pad_val=0):
 
     if len(img.shape) == 3:  # 3D image
         img = np.pad(img, ((pads[0], 0), (pads[1], 0), (0, 0)), mode='constant', constant_values=pad_val)
-        img = np.transpose(img, (2, 1, 0))
+        # img = np.transpose(img, (2, 1, 0))
     else:
         img = np.pad(img, ((pads[0], 0), (pads[1], 0)), mode='constant', constant_values=pad_val)
 

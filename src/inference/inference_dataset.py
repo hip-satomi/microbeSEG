@@ -132,6 +132,9 @@ class ToTensor(object):
 
         img = sample['image']
 
+        if len(img.shape) == 3 and img.shape[-1] == 3:
+            img = np.transpose(img, (2, 0, 1))
+
         if len(img.shape) == 2:
             img = img[None, :, :]
 

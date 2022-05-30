@@ -28,7 +28,7 @@ class InferWorker(QObject):
     stop_inference = False
 
     def __init__(self, img_id_list, inference_path, omero_username, omero_password, omero_host, omero_port, group_id,
-                 model, device, ths, channel=0, upload=True, overwrite=True, sliding_window=False):
+                 model, device, ths, upload=True, overwrite=True, sliding_window=False):
         """
 
         :param img_id_list: List of omero image ids
@@ -51,8 +51,6 @@ class InferWorker(QObject):
         :type device: torch device
         :param ths: Thresholds for the post-processing
         :type ths: list
-        :param channel: Channel to process
-        :type channel: int
         :param upload: Upload results to OMERO
         :type upload: bool
         :param overwrite: Overwrite results on OMERO
@@ -70,7 +68,7 @@ class InferWorker(QObject):
         self.omero_port = omero_port
         self.conn = None
         self.inference_path = inference_path  # path for local results
-        self.channel = channel
+        self.channel = 'rgb'
         self.upload = upload
         self.overwrite = overwrite
         self.sliding_window = sliding_window
@@ -121,7 +119,7 @@ class InferWorker(QObject):
                               normalization=self.model_settings['architecture'][3],
                               device=self.device,
                               num_gpus=1,  # Only batch size 1 is used at the time, so makes no sense to use more gpus
-                              ch_in=1,
+                              ch_in=3 if self.channel == 'rgb' else 1,
                               ch_out=1 if self.model_settings['label_type'] == 'distance' else 3,
                               filters=self.model_settings['architecture'][4])
 
@@ -163,8 +161,8 @@ class InferWorker(QObject):
                 continue
 
             # Get image from Omero
-            if self.channel + 1 > img_ome.getSizeC():
-                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (not enough channels found)')
+            if img_ome.getSizeC() != 3:
+                self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no rgb image)')
                 continue
 
             # Check if results exist and should not be overwritten
@@ -232,7 +230,13 @@ class InferWorker(QObject):
                     return
 
                 # Get image from Omero
-                img = img_ome.getPrimaryPixels().getPlane(0, self.channel, frame)
+                img = np.zeros(shape=(img_ome.getSizeY(), img_ome.getSizeX(), 3))
+                zct_list = []
+                for z in range(img_ome.getSizeZ()):  # all slices (1 anyway)
+                    for c in range(img_ome.getSizeC()):  # all channels
+                        zct_list.append((z, c, frame))
+                for h, plane in enumerate(img_ome.getPrimaryPixels().getPlanes(zct_list)):
+                    img[:, :, zct_list[h][1]] = plane
 
                 # Get frame_min and frame_max before padding/cropping
                 img_min, img_max, img_mean, img_std = np.min(img), np.max(img), np.mean(img), np.std(img)
@@ -252,7 +256,7 @@ class InferWorker(QObject):
                     img_ome = self.conn.getObject("Image", img_ome.getId())  # Reload needed
                     mask_polygon = omero.model.PolygonI()
                     mask_polygon.theZ, mask_polygon.theT, mask_polygon.fillColor = rint(0), rint(frame), rint(0)
-                    mask_polygon.theC = rint(self.channel)
+                    # mask_polygon.theC = rint(self.channel)
                     mask_polygon.strokeColor = rint(
                         int.from_bytes([255, 255, 0, 255], byteorder='big', signed=True))
                     prediction_ids = get_indices_pandas(prediction)
@@ -323,8 +327,9 @@ class InferWorker(QObject):
         torch.set_grad_enabled(False)
 
         # Normalize crop and convert to tensor / img_batch
+        img = np.transpose(img, (2, 0, 1))  # color channel on first position
         img_batch = 2 * (img.astype(np.float32) - min_val) / (max_val - min_val) - 1
-        img_batch = torch.from_numpy(img_batch[None, None, :, :]).to(torch.float)
+        img_batch = torch.from_numpy(img_batch[None, :, :]).to(torch.float)
         img_batch = img_batch.to(self.device)
 
         # Prediction
@@ -332,7 +337,7 @@ class InferWorker(QObject):
             try:
                 prediction_border_batch, prediction_cell_batch = self.net(img_batch)
             except RuntimeError:
-                prediction = np.zeros_like(img, dtype=np.uint16)[pads[0]:, pads[1]:]
+                prediction = np.zeros_like(img, dtype=np.uint16)[0, pads[0]:, pads[1]:]
                 self.text_output.emit('RuntimeError during inference (maybe not enough ram/vram?)')
             else:
                 prediction_cell_batch = prediction_cell_batch[0, 0, pads[0]:, pads[1]:, None].cpu().numpy()
@@ -345,11 +350,11 @@ class InferWorker(QObject):
             try:
                 prediction_batch = self.net(img_batch)
             except RuntimeError:
-                prediction = np.zeros_like(img, dtype=np.uint16)[pads[0]:, pads[1]:]
+                prediction = np.zeros_like(img, dtype=np.uint16)[0, pads[0]:, pads[1]:]
                 self.text_output.emit('RuntimeError during inference (maybe not enough ram/vram?)')
             else:
                 prediction_batch = F.softmax(prediction_batch, dim=1)
-                prediction_batch = prediction_batch[:, :, pads[0]:, pads[1]].cpu().numpy()
+                prediction_batch = prediction_batch[:, :, pads[0]:, pads[1]:].cpu().numpy()
                 prediction_batch = np.transpose(prediction_batch[0], (1, 2, 0))
                 prediction = boundary_postprocessing(prediction_batch)
 
