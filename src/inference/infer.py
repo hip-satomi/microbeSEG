@@ -349,7 +349,7 @@ class InferWorker(QObject):
                 self.text_output.emit('RuntimeError during inference (maybe not enough ram/vram?)')
             else:
                 prediction_batch = F.softmax(prediction_batch, dim=1)
-                prediction_batch = prediction_batch[:, :, pads[0]:, pads[1]].cpu().numpy()
+                prediction_batch = prediction_batch[:, :, pads[0]:, pads[1]:].cpu().numpy()
                 prediction_batch = np.transpose(prediction_batch[0], (1, 2, 0))
                 prediction = boundary_postprocessing(prediction_batch)
 
