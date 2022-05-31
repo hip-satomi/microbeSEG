@@ -75,6 +75,9 @@ After the crop creation, the annotation tool can be opened and the crops can be 
 
 ![annotation](doc/annotation.png)
 
+Recommendation: Select a brush size as thick as your cells are if possible. Then, you can save some time. An annotation tutorial is available [here](https://www.youtube.com/watch?v=1UMy6wnDnAU).
+
+
 ### Training Data Import and Export
 Annotated training data can be imported using the *Import* button. Thereby, it can be specified if the images will be min-max normalized or keep their normalization and to which training data subset they are added (train, val, test). Then, the training data will be cropped and uploaded to OMERO into the selected training set.
 
