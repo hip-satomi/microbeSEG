@@ -2168,7 +2168,7 @@ class MicrobeSegMainWindow(QWidget):
         if not self.split_info:
             self.split_info = {'used': [],      # used/denied experiment-frames
                                'num_acc': 0,    # number of accepted crops (without imported)
-                               'num_ext:': 0}   # needed for filenaming of imported (external) crops
+                               'num_ext': 0}    # needed for filenaming of imported (external) crops
         if 'num_ext' not in self.split_info:
             self.split_info['num_ext'] = 0
 
