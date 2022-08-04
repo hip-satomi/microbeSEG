@@ -86,15 +86,19 @@ class DataImportWorker(QObject):
                 break
 
             # Load image if type is supported
-            if img_id.suffix.lower() in ['.png', '.tiff', '.tif', '.jpeg']:
+            if img_id.suffix.lower() in ['.png', '.tiff', '.tif', '.jpeg', '.jpg']:
                 img = np.squeeze(imread(str(img_id)))
             else:
                 continue
 
             # Load corresponding mask
             mask_id = img_id.parent / "mask{}".format(img_id.name.split('img')[-1])
-            if mask_id.suffix.lower() in ['.png', '.tiff', '.tif', '.jpeg']:
-                mask = np.squeeze(imread(str(mask_id)))
+            if mask_id.suffix.lower() in ['.png', '.tiff', '.tif', '.jpeg', '.jpg']:
+                try:  # Mask and image could have different file formats
+                    mask = np.squeeze(imread(str(mask_id)))
+                except FileNotFoundError:
+                    self.text_output.emit("  {}: No mask found (different file formats?)".format(img_id.name))
+                    continue
             else:
                 continue
 
@@ -112,6 +116,14 @@ class DataImportWorker(QObject):
                 continue
             elif len(img.shape) > 3:
                 self.text_output.emit("  {}: 3D image --> skip".format(img_id.name))
+                continue
+
+            # Some masks are pseudo-rgb images
+            if len(mask.shape) == 3 and mask.shape[-1] <= 3:
+                mask = np.mean(mask, axis=-1).astype(mask.dtype)
+                self.text_output.emit("  {}: rgb mask converted to grayscale".format(img_id.name))
+            if len(mask.shape) >= 3:
+                self.text_output.emit("  {}: mask shape not supported --> skip".format(img_id.name))
                 continue
 
             # Get crop information before cropping/padding
