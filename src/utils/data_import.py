@@ -102,6 +102,10 @@ class DataImportWorker(QObject):
             else:
                 continue
 
+            if np.max(mask) == 0:
+                self.text_output.emit("  {}: empty mask --> skip".format(img_id.name))
+                continue
+
             # Discard 3D images and convert rgb/multi-channel images to grayscale
             if len(img.shape) == 3 and img.shape[-1] <= 3:
                 img = np.mean(img, axis=-1).astype(img.dtype)
