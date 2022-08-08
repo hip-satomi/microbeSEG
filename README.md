@@ -9,7 +9,7 @@ microbeSEG is a deep learning-based tool for instance segmentation of roundish o
 * [Anaconda Distribution](https://www.anaconda.com/distribution/#download-section).
 * For GPU use: a CUDA capable GPU (highly recommended for training).
 * Access to an [OMERO](https://www.openmicroscopy.org/omero/) server. For testing purposes a [free demo account](http://qa.openmicroscopy.org.uk/registry/demo_account/) can be requested.
-* ObiWan-Microbi (to be published): after installing [ObiWan-Microbi](https://github.com/hip-satomi/ObiWan-Microbi), an OMERO server is available at the default ports.
+* ObiWan-Microbi: after installing [ObiWan-Microbi](https://github.com/hip-satomi/ObiWan-Microbi), an OMERO server is available at the default ports.
 
 ## Installation
 
@@ -150,8 +150,10 @@ Press F1 to open a short help.
 ## microbeSEG Dataset
 A segmentation dataset with *E. coli* and *B. subtilis* training data is available at https://doi.org/10.5281/zenodo.6497715.
 
-## Publication
-T. Scherr et al (2022): microbeSEG: Accurate cell segmentation with OMERO data management, bioRxiv, [doi:10.1101/2022.04.29.489998v1](https://www.biorxiv.org/content/10.1101/2022.04.29.489998v1). 
+## Publications
+T. Scherr et al. (2022): microbeSEG: Accurate cell segmentation with OMERO data management, bioRxiv, [doi:10.1101/2022.04.29.489998v1](https://www.biorxiv.org/content/10.1101/2022.04.29.489998v1). 
+
+J. Seiffarth et al. (2022): ObiWan-Microbi: OMERO-based integrated workflow for annotating microbes in the cloud, bioRxiv, [doi:10.1101/2022.08.01.502297](https://doi.org/10.1101/2022.08.01.502297).
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
