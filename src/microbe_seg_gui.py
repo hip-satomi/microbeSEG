@@ -1611,6 +1611,7 @@ class MicrobeSegMainWindow(QWidget):
         """
         box = QMessageBox()
         box.setWindowTitle(title)
+        box.setWindowIcon(QIcon(str(self.model_path.parent / 'doc' / 'window-logo.png')))
         box.setText(text)
         box.setPalette(self.get_dark_palette())
         box.exec()
