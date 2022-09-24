@@ -150,7 +150,8 @@ class ResultExportWorker(QObject):
 
             # Get image
             if img_ome.getSizeC() > 1:
-                img = np.zeros(shape=(img_ome.getSizeT(), img_ome.getSizeY(), img_ome.getSizeX(), img_ome.getSizeC()))
+                img = np.zeros(shape=(img_ome.getSizeT(), img_ome.getSizeY(), img_ome.getSizeX(), img_ome.getSizeC()),
+                               dtype=img_ome.getPixelsType())
                 zct_list = []
                 for z in range(img_ome.getSizeZ()):  # all slices (1 anyway)
                     for c in range(img_ome.getSizeC()):  # all channels
