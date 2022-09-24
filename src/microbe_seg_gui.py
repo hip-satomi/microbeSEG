@@ -605,6 +605,8 @@ class MicrobeSegMainWindow(QWidget):
         crop_size_layout_2.addWidget(self.crop_size_512_rbutton)
         crop_size_layout_2.addWidget(self.crop_size_768_rbutton)
         crop_size_layout_2.addWidget(self.crop_size_1024_rbutton)
+        crop_size_layout_1.setAlignment(Qt.AlignLeft)
+        crop_size_layout_2.setAlignment(Qt.AlignLeft)
         omero_new_trainset_layout.addWidget(self.crop_size_label)
         omero_new_trainset_layout.addLayout(crop_size_layout_1), omero_new_trainset_layout.addLayout(crop_size_layout_2)
         omero_new_trainset_name_layout = QHBoxLayout()
@@ -626,12 +628,14 @@ class MicrobeSegMainWindow(QWidget):
         color_channel_layout.addWidget(self.color_channel_2_rbutton)
         color_channel_layout.addWidget(self.color_channel_3_rbutton)
         color_channel_layout.addWidget(self.color_channel_rgb_rbutton)
+        color_channel_layout.setAlignment(Qt.AlignLeft)
 
         # Settings box: device selection layout
         device_layout = QHBoxLayout()
         device_layout.addWidget(self.device_label)
         device_layout.addWidget(self.device_cpu_rbutton)
         device_layout.addWidget(self.device_gpu_rbutton)
+        device_layout.setAlignment(Qt.AlignLeft)
 
         # Settings box: group selection layout
         group_selection_layout = QVBoxLayout()
@@ -682,10 +686,12 @@ class MicrobeSegMainWindow(QWidget):
         crop_data_set_selection_layout.addWidget(self.crop_data_train_set_checkbox)
         crop_data_set_selection_layout.addWidget(self.crop_data_val_set_checkbox)
         crop_data_set_selection_layout.addWidget(self.crop_data_test_set_checkbox)
+        crop_data_set_selection_layout.setAlignment(Qt.AlignLeft)
         add_crops_layout.addLayout(crop_data_set_selection_layout)
         add_crops_layout.addWidget(self.train_data_crop_button)
         add_crops_layout.addWidget(self.train_data_annotate_button)
         add_crops_box.setLayout(add_crops_layout)
+        add_crops_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         # Submenu - prelabel model selection layout
         prelabel_model_selection_layout = QVBoxLayout()
@@ -702,10 +708,12 @@ class MicrobeSegMainWindow(QWidget):
         import_data_set_selection_layout.addWidget(self.import_data_train_set_checkbox)
         import_data_set_selection_layout.addWidget(self.import_data_val_set_checkbox)
         import_data_set_selection_layout.addWidget(self.import_data_test_set_checkbox)
+        import_data_set_selection_layout.setAlignment(Qt.AlignLeft)
         import_data_layout.addLayout(import_data_set_selection_layout)
         import_data_layout.addWidget(self.import_data_button)
         import_data_layout.addWidget(self.import_data_progress_bar)
         import_data_box.setLayout(import_data_layout)
+        import_data_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         # Submenu - train data: export data layout
         export_data_box = QGroupBox("Export training set")
@@ -713,6 +721,7 @@ class MicrobeSegMainWindow(QWidget):
         export_data_layout.addWidget(self.export_data_button)
         export_data_layout.addWidget(self.export_data_progress_bar)
         export_data_box.setLayout(export_data_layout)
+        export_data_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         # Submenu - train data layout
         train_data_layout = QVBoxLayout()
@@ -756,6 +765,7 @@ class MicrobeSegMainWindow(QWidget):
         train_method_layout.addWidget(self.train_settings_method_boundary_rbutton)
         train_method_layout.addWidget(self.train_settings_method_distance_rbutton)
         train_method_box.setLayout(train_method_layout)
+        train_method_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         # Submenu - train settings: batch size and iterations layout
         train_batch_size_layout = QHBoxLayout()
@@ -770,6 +780,7 @@ class MicrobeSegMainWindow(QWidget):
         train_optimizer_layout.addWidget(self.train_settings_optimizer_label)
         train_optimizer_layout.addWidget(self.train_settings_optimizer_adam_rbutton)
         train_optimizer_layout.addWidget(self.train_settings_optimizer_ranger_rbutton)
+        train_optimizer_layout.setAlignment(Qt.AlignLeft)
 
         # Submenu - train settings layout
         train_layout = QVBoxLayout()
@@ -805,6 +816,7 @@ class MicrobeSegMainWindow(QWidget):
         inference_predict_layout.addWidget(self.inference_menu_process_button)
         inference_predict_layout.addWidget(self.inference_progress_bar)
         inference_predict_box.setLayout(inference_predict_layout)
+        inference_predict_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         inference_correct_box = QGroupBox("Correct and analyze results")
         inference_correct_layout = QVBoxLayout()
@@ -812,12 +824,14 @@ class MicrobeSegMainWindow(QWidget):
         inference_correct_layout.addWidget(self.inference_menu_analyze_button)
         inference_correct_layout.addWidget(self.analysis_progress_bar)
         inference_correct_box.setLayout(inference_correct_layout)
+        inference_correct_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         inference_export_box = QGroupBox("Export data and results")
         inference_export_layout = QVBoxLayout()
         inference_export_layout.addWidget(self.inference_menu_export_button)
         inference_export_layout.addWidget(self.result_export_progress_bar)
         inference_export_box.setLayout(inference_export_layout)
+        inference_export_box.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         inference_layout = QVBoxLayout()
         inference_layout.addWidget(inference_predict_box)
