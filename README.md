@@ -155,5 +155,8 @@ T. Scherr et al. (2022): microbeSEG: Accurate cell segmentation with OMERO data 
 
 J. Seiffarth et al. (2022): ObiWan-Microbi: OMERO-based integrated workflow for annotating microbes in the cloud, bioRxiv, [doi:10.1101/2022.08.01.502297](https://doi.org/10.1101/2022.08.01.502297).
 
+## See Also
+[BeadNet v2](https://github.com/TimScherr/BeadNet-v2): Deep learning-based particle and spot detection in microscopy images with OMERO data management.
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
