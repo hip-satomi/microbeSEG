@@ -151,7 +151,7 @@ Press F1 to open a short help.
 A segmentation dataset with *E. coli* and *B. subtilis* training data is available at https://doi.org/10.5281/zenodo.6497715.
 
 ## Publications
-T. Scherr et al. (2022): microbeSEG: Accurate cell segmentation with OMERO data management, bioRxiv, [doi:10.1101/2022.04.29.489998v1](https://www.biorxiv.org/content/10.1101/2022.04.29.489998v1). 
+T. Scherr et al. (2022): microbeSEG: A deep learning software tool with OMERO data management for efficient and accurate cell segmentation, bioRxiv, [doi:10.1101/2022.04.29.489998](https://www.biorxiv.org/content/10.1101/2022.04.29.489998). 
 
 J. Seiffarth et al. (2022): ObiWan-Microbi: OMERO-based integrated workflow for annotating microbes in the cloud, bioRxiv, [doi:10.1101/2022.08.01.502297](https://doi.org/10.1101/2022.08.01.502297).
 
