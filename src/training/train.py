@@ -276,6 +276,7 @@ class TrainWorker(QObject):
                             filters = [32, 512]
                         elif filters[-1] == 512:
                             text = "Model does not fit on RAM/VRAM. Reduce model depth"
+                            filters = [32, 256]
                         else:
                             text = "Please, try again with smaller batch size or reduce the crop size (use the export " \
                                    "and import functionalities for this)"
