@@ -28,7 +28,7 @@ class InferWorker(QObject):
     stop_inference = False
 
     def __init__(self, img_id_list, inference_path, omero_username, omero_password, omero_host, omero_port, group_id,
-                 model, device, ths, channel=0, upload=True, overwrite=True, sliding_window=False):
+                 model, device, ths, channel=0, upload=True, overwrite=True, sliding_window=False, print_output=False):
         """
 
         :param img_id_list: List of omero image ids
@@ -77,6 +77,7 @@ class InferWorker(QObject):
         self.device = device
         self.group_id = group_id
         self.net = None
+        self.print = print_output
 
         # Load model json file to get architecture + filters
         with open(model) as f:
@@ -155,16 +156,22 @@ class InferWorker(QObject):
 
             if not self.conn.canWrite(img_ome):
                 self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no write permission)')
+                if self.print:
+                    print(f'Skip {parent_projects}: {img_ome.getName()} (no write permission)')
                 continue
 
             # Check if z stack
             if img_ome.getSizeZ() > 1:
                 self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (is z-stack)')
+                if self.print:
+                    print(f'Skip {parent_projects}: {img_ome.getName()} (is z-stack)')
                 continue
 
             # Get image from Omero
             if self.channel + 1 > img_ome.getSizeC():
                 self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (not enough channels found)')
+                if self.print:
+                    print(f'Skip {parent_projects}: {img_ome.getName()} (not enough channels found)')
                 continue
 
             # Check if results exist and should not be overwritten
@@ -206,7 +213,12 @@ class InferWorker(QObject):
             if already_processed and not self.overwrite:
                 self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (already processed and '
                                       f'overwriting not enabled)')
+                if self.print:
+                    print(f'Skip {parent_projects}: {img_ome.getName()} (already processed and overwriting not enabled)')
                 continue
+
+            if self.print:
+                print(f'Process {parent_projects}: {img_ome.getName()} (channel: {self.channel})')
 
             if not self.upload:
                 if isinstance(parent_projects, list):
