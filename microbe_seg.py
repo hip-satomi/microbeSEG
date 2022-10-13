@@ -14,7 +14,7 @@ def run_microbe_seg():
     np.random.seed()
 
     # Get default settings for the omero login
-    with open(Path.cwd() / 'settings.json') as f:
+    with open(Path(__file__).parent/'settings.json') as f:
         settings = json.load(f)
 
     # Set device for using CPU or GPU
