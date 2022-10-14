@@ -97,6 +97,8 @@ def main():
         elif len(img.shape) == 5:
             print(f'Skip {fname.name} (not supported image shape)')
             continue
+        else:
+            raise Exception('Adapt script for your data format!')
 
         # Check if results exist and should not be overwritten
         already_processed = False
