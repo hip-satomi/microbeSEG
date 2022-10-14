@@ -137,8 +137,8 @@ Training, evaluation, inference, data imports and data exports can be stopped by
 ### Help
 Press F1 to open a short help.
 
-## Scripting
-Scripts for inference are available in */src/inference/*. The scripts allow using microbeSEG without graphical user interface. One script is for the use with OMERO (project/dataset/file ids need to be stated), the other script is for processing local .tif files (may need adaptation to your image shape).
+## Scripts for Use without Graphical User Interface
+Inference scripts are available in */src/inference/*. The scripts allow using microbeSEG without the graphical user interface. One script is for the use with OMERO (project/dataset/file ids need to be stated), the other script is for processing local .tif files (may need adaptation to your image shape).
 
 ## OMERO
 - OMERO clients overview: [https://docs.openmicroscopy.org/omero/5.6.1/users/clients-overview.html](https://docs.openmicroscopy.org/omero/5.6.1/users/clients-overview.html)
