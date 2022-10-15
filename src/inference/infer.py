@@ -154,7 +154,7 @@ class InferWorker(QObject):
             else:
                 parent_projects = img_ome.getProject().getName()
 
-            if not self.conn.canWrite(img_ome):
+            if self.upload and not self.conn.canWrite(img_ome):
                 self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no write permission)')
                 if self.print:
                     print(f'Skip {parent_projects}: {img_ome.getName()} (no write permission)')
