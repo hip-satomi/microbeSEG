@@ -317,10 +317,8 @@ def distance_label(label, search_radius):
         nucleus_neighbor_crop_dist = distance_transform_edt(nucleus_neighbor_crop)
         nucleus_neighbor_crop_dist = nucleus_neighbor_crop_dist * nucleus_neighbor_crop_nucleus
         if np.max(nucleus_neighbor_crop_dist) > 0:
-            if props[i].minor_axis_length > 0:  # sometimes invalid values encounter in true_divide?
-                denominator = np.minimum(1.25 * max_dist, props[i].minor_axis_length)
-            else:
-                denominator = max_dist
+            denominator = np.minimum(max_dist + 3,  # larger than max_dist since scaled later on (improves small cells)
+                                     np.max(nucleus_neighbor_crop_dist))
             nucleus_neighbor_crop_dist = nucleus_neighbor_crop_dist / denominator
             nucleus_neighbor_crop_dist = np.clip(nucleus_neighbor_crop_dist, 0, 1)
         else:
