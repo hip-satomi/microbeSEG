@@ -1,1 +1,1 @@
-Download the models from ... and put them here.
+Download the models from https://doi.org/10.5281/zenodo.7221151 and put them here.
