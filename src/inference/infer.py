@@ -154,7 +154,7 @@ class InferWorker(QObject):
             else:
                 parent_projects = img_ome.getProject().getName()
 
-            if self.upload and not self.conn.canWrite(img_ome):
+            if self.upload and not img_ome.canAnnotate():
                 self.text_output.emit(f'  Skip {parent_projects}: {img_ome.getName()} (no write permission)')
                 if self.print:
                     print(f'Skip {parent_projects}: {img_ome.getName()} (no write permission)')
@@ -253,7 +253,7 @@ class InferWorker(QObject):
                 img, pads = zero_pad_model_input(img, pad_val=img_min)
 
                 # Predict crop
-                prediction = self.inference(img, min_val=img_min, max_val=img_max, pads=pads)  # ToDo: sliding window
+                prediction = self.inference(img, min_val=img_min, max_val=img_max, pads=pads)
 
                 # Fill results array
                 results_array[frame] = prediction
@@ -298,7 +298,12 @@ class InferWorker(QObject):
                             for key, value in keys_values:
                                 if key not in ['inference_model', 'inference_date', 'last_modification']:
                                     key_value_data.append([key, value])
-                            self.conn.deleteObjects("Annotation", [ann.getId()])
+                            if ann.canEdit():
+                                self.conn.deleteObjects("Annotation", [ann.getId()], wait=True)
+                            else:
+                                self.text_output.emit(
+                                    f'  Problems with deleting annotations (probably from another user), redundant'
+                                    f' results possible. Please check on OMERO.web.')
                     map_ann = MapAnnotationWrapper(self.conn)
                     map_ann.setNs(
                         metadata.NSCLIENTMAPANNOTATION)  # Use 'client' namespace to allow editing in Insight & web
