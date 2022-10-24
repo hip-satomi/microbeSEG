@@ -188,7 +188,10 @@ class InferWorker(QObject):
                     result = roi_service.findByImage(img_ome.getId(), None)
                     roi_ids = [roi.id.val for roi in result.rois if type(roi.getShape(0)) == omero.model.PolygonI]
                     if roi_ids:
-                        self.conn.deleteObjects("Roi", roi_ids)
+                        try:
+                            self.conn.deleteObjects("Roi", roi_ids, wait=True)
+                        except:
+                            self.text_output.emit('  Something went wrong during the deletion of already available ROIs')
 
                     # Delete attachments from label tool and analysis
                     to_delete = []
