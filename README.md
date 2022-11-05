@@ -138,7 +138,7 @@ Training, evaluation, inference, data imports and data exports can be stopped by
 Press F1 to open a short help.
 
 ## Scripts for Using microbeSEG without Graphical User Interface
-A training script is available in */src/training/*. Two inference scripts are available in */src/inference/*. The scripts allow using microbeSEG without the graphical user interface. One inference script is for the use with OMERO (project/dataset/file ids need to be stated), the other script is for processing local .tif files (may need adaptation to your image shape).
+The scripts *train_script.py*, *infer_script.py*, and *infer_script_local.py* allow using microbeSEG without the graphical user interface. One inference script is for the use with OMERO (project/dataset/file ids need to be stated), the other script is for processing local .tif files (may need adaptation to your image shape).
 
 ## OMERO
 - OMERO clients overview: [https://docs.openmicroscopy.org/omero/5.6.1/users/clients-overview.html](https://docs.openmicroscopy.org/omero/5.6.1/users/clients-overview.html)
