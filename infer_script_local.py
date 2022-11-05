@@ -26,7 +26,7 @@ def main():
 
     # Path
     imgs_path = Path(args.img_dir)
-    result_path = (Path(__file__).parents[2] / 'results') if args.result_path is None else Path(args.result_path)
+    result_path = (Path(__file__).parent / 'results') if args.result_path is None else Path(args.result_path)
     result_path.mkdir(exist_ok=True)
 
     # Check if model is available

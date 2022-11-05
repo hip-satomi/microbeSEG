@@ -34,7 +34,7 @@ def main():
     omero_password = getpass.getpass(prompt="Password") if args.password is None else args.password
 
     # Get host and port for the OMERO login
-    with open(Path(__file__).parents[2] / 'settings.json') as f:
+    with open(Path(__file__).parent / 'settings.json') as f:
         settings = json.load(f)
     omero_host = settings['omero_host'] if args.host is None else args.host
     omero_port = settings['omero_port'] if args.port is None else args.port
@@ -51,7 +51,7 @@ def main():
     conn.close()
 
     # Result path
-    result_path = (Path(__file__).parents[2] / 'results') if args.result_path is None else Path(args.result_path)
+    result_path = (Path(__file__).parent / 'results') if args.result_path is None else Path(args.result_path)
 
     # Check if model is available
     inference_model = Path(args.model)

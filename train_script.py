@@ -32,7 +32,7 @@ def main():
     omero_password = getpass.getpass(prompt="Password") if args.password is None else args.password
 
     # Get host and port for the OMERO login
-    with open(Path(__file__).parents[2] / 'settings.json') as f:
+    with open(Path(__file__).parent / 'settings.json') as f:
         settings = json.load(f)
     omero_host = settings['omero_host'] if args.host is None else args.host
     omero_port = settings['omero_port'] if args.port is None else args.port
@@ -49,8 +49,8 @@ def main():
     conn.close()
 
     # Paths
-    model_path = (Path(__file__).parents[2] / 'models') if args.model_path is None else Path(args.model_path)
-    train_path = Path(__file__).parents[2] / 'training_dataset'
+    model_path = (Path(__file__).parent / 'models') if args.model_path is None else Path(args.model_path)
+    train_path = Path(__file__).parent / 'training_dataset'
 
     # Set device for using CPU or GPU
     if 'cuda' in args.device and not torch.cuda.is_available():
