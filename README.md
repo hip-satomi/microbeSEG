@@ -163,7 +163,7 @@ When using these models, please cite (and check if pre-prints have meanwhile bee
 * the latest Cell Tracking Challenge publication: [current paper](https://doi.org/10.1038/nmeth.4473).
 
 ## Publications
-T. Scherr et al. (2022): microbeSEG: A deep learning software tool with OMERO data management for efficient and accurate cell segmentation, bioRxiv, [doi:10.1101/2022.04.29.489998](https://www.biorxiv.org/content/10.1101/2022.04.29.489998). 
+T. Scherr et al. (2022): microbeSEG: A deep learning software tool with OMERO data management for efficient and accurate cell segmentation. PLoS ONE 17(11): e0277601, [doi:10.1371/journal.pone.0277601](https://doi.org/10.1371/journal.pone.0277601). 
 
 J. Seiffarth et al. (2022): ObiWan-Microbi: OMERO-based integrated workflow for annotating microbes in the cloud, bioRxiv, [doi:10.1101/2022.08.01.502297](https://doi.org/10.1101/2022.08.01.502297).
 
