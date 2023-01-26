@@ -154,7 +154,7 @@ The scripts *train_script.py*, *infer_script.py*, and *infer_script_local.py* al
 A segmentation dataset with *E. coli* and *B. subtilis* training data is available at https://doi.org/10.5281/zenodo.6497715.
 
 ## Available microbeSEG Models
-Models trained on a dataset consisting of 826 320x320 px crops extracted from the Omnipose dataset (bact_fluor train, bact_phase train), the microbeSEG dataset, and the Cell Tracking Challenge datasets BF-C2DL-HSC, BF-C2DL-MuSC, Fluo-N2DL-HeLa, and PhC-C2DL-PSC are available at https://doi.org/10.5281/zenodo.6497715. The training dataset is also provided. Just download all files into the directory *models/published* in the microbeSEG repository. The models can then be selected in the graphical user interface of microbeSEG.
+Models trained on a dataset consisting of 826 320x320 px crops extracted from the Omnipose dataset (bact_fluor train, bact_phase train), the microbeSEG dataset, and the Cell Tracking Challenge datasets BF-C2DL-HSC, BF-C2DL-MuSC, Fluo-N2DL-HeLa, and PhC-C2DL-PSC are available at [https://doi.org/10.5281/zenodo.6497715](https://doi.org/10.5281/zenodo.7221151). The training dataset is also provided. Just download all files into the directory *models/published* in the microbeSEG repository. The models can then be selected in the graphical user interface of microbeSEG.
 
 When using these models, please cite (and check if pre-prints have meanwhile been published in a journal/conference):
 * [microbeSEG](https://doi.org/10.1101/2022.04.29.489998),
